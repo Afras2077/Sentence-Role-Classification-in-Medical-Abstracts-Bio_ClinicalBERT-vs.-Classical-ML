@@ -36,3 +36,5 @@ results/metrics/*.json
 # IDE
 .vscode/
 .idea/
+pubmed-rct/PubMed_200k_RCT/train.txt
+setup-repo.ipynb
