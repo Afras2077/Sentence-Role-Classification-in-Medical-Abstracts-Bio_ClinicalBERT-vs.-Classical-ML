@@ -1,0 +1,4 @@
+Classical_Model,Macro_F1_diff,CI_95_bootstrap,Only_Classical_Right,Only_BERT_Right,McNemar_p
+LogReg (SGD),+0.0512,"[+0.0456, +0.0570]",1046,2439,2.3e-126
+XGBoost,+0.0838,"[+0.0775, +0.0898]",1092,3611,5.0e-311
+Random Forest,+0.1008,"[+0.0943, +0.1070]",1078,4020,<1e-300
