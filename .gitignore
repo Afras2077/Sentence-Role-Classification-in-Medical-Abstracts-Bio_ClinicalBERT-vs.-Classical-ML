@@ -1,4 +1,4 @@
-﻿# Python
+# Python
 venv/
 .venv/
 __pycache__/
@@ -14,13 +14,18 @@ build/
 
 # Data (large files — use DVC or store externally)
 data/raw/*.csv
+data/raw/*.txt
 data/raw/*.parquet
-data/processed/
+data/processed/*.csv
+!data/raw/.gitkeep
+!data/processed/.gitkeep
 
 # Model weights (large files)
 models/transformers/
 models/classical/*.pkl
 models/classical/*.joblib
+!models/classical/.gitkeep
+!models/transformers/.gitkeep
 
 # MLflow
 mlruns/

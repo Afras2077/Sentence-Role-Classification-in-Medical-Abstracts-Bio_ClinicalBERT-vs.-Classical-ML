@@ -1,57 +1,146 @@
-﻿# ============================================================
-# ESI Triage: ML vs Transformers — Central Configuration
-# ============================================================
+# ==============================================================================
+# F26-07 | PubMed RCT: Bio_ClinicalBERT vs. Classical ML
+# Central Experiment and Pipeline Configuration
+# ==============================================================================
 
 project:
-  name: "esi-triage-ml-vs-transformers"
+  name: "pubmed-rct-sentence-role-classification"
+  title: "Sentence-Role Classification in Medical Abstracts: Fine-Tuned Biomedical Transformers vs. Classical Machine Learning on PubMed RCT"
+  project_id: "F26-07"
+  track: "Track A (Research & Development)"
+  course: "AI2002 - Artificial Intelligence"
+  instructor: "Hajra Waheed"
+  semester: 5
+  department: "Department of Data Science"
+  institution: "National University of Computer and Emerging Sciences"
+  authors:
+    - name: "Azan Wasty"
+      roll_no: "24L-2557"
+    - name: "Nauman Iqbal"
+      roll_no: "24L-2565"
+    - name: "Afras Shahnawaz"
+      roll_no: "24L-2547"
   seed: 42
-  target_column: "ESI"
-  text_column: "chief_complaint"
+  target_column: "label"
+  text_column: "text"
+  classes:
+    - "BACKGROUND"
+    - "OBJECTIVE"
+    - "METHODS"
+    - "RESULTS"
+    - "CONCLUSIONS"
+  label2id:
+    BACKGROUND: 0
+    OBJECTIVE: 1
+    METHODS: 2
+    RESULTS: 3
+    CONCLUSIONS: 4
+  id2label:
+    0: "BACKGROUND"
+    1: "OBJECTIVE"
+    2: "METHODS"
+    3: "RESULTS"
+    4: "CONCLUSIONS"
 
 data:
-  raw_path: "data/raw/fedmml_ed_triage_dataset.csv"
-  processed_train: "data/processed/train.csv"
-  processed_val: "data/processed/val.csv"
-  processed_test: "data/processed/test.csv"
-  test_size: 0.15
-  val_size: 0.15
+  dataset_name: "PubMed 20k RCT"
+  source_repo: "https://github.com/Franck-Dernoncourt/pubmed-rct"
+  raw_dir: "data/raw/"
+  train_raw: "data/raw/train.txt"
+  dev_raw: "data/raw/dev.txt"
+  test_raw: "data/raw/test.txt"
+  processed_dir: "data/processed/"
+  train_processed: "data/processed/train.csv"
+  val_processed: "data/processed/val.csv"
+  test_processed: "data/processed/test.csv"
+  official_splits:
+    train_sentences: 180040
+    train_abstracts: 15000
+    dev_sentences: 30212
+    dev_abstracts: 2500
+    test_sentences: 30135
+    test_abstracts: 2500
 
 preprocessing:
-  lowercase: true
-  remove_punctuation: true
-  remove_stopwords: false
-  lemmatize: true
-  max_text_length: 512
+  normalize_whitespace: true
+  keep_numbers: true
+  keep_punctuation: true
+  keep_stopwords: true
+  rationale: "Numbers/percentages are vital cues for RESULTS; tense words ('was','will') separate METHODS from RESULTS."
 
 classical_models:
-  tfidf:
-    max_features: 50000
+  tfidf_big:
+    max_features: 200000
     ngram_range: [1, 2]
+    min_df: 3
+    sublinear_tf: true
+  tfidf_small:
+    max_features: 20000
+    ngram_range: [1, 2]
+    min_df: 3
     sublinear_tf: true
   models:
-    - logistic_regression
-    - random_forest
-    - svm
-    - xgboost
-    - naive_bayes
+    logistic_regression:
+      solver: "sgd"
+      loss: "log_loss"
+      alpha: 2.0e-6
+      max_iter: 30
+      tol: 1.0e-4
+      class_weight: "balanced"
+      features: "tfidf_big"
+    random_forest:
+      n_estimators: 100
+      max_features: "sqrt"
+      min_samples_leaf: 3
+      class_weight: "balanced_subsample"
+      n_jobs: -1
+      features: "tfidf_small"
+    xgboost:
+      n_estimators: 300
+      max_depth: 6
+      learning_rate: 0.2
+      subsample: 0.8
+      colsample_bytree: 0.5
+      eval_metric: "mlogloss"
+      features: "tfidf_small"
+  position_extension:
+    enabled: true
+    classifier: "logistic_regression"
+    features:
+      - "position_bin_10"
+      - "is_first_sentence"
+      - "is_last_sentence"
+      - "contains_numeric"
+      - "log_line_length"
 
 transformer_models:
   base_model: "emilyalsentzer/Bio_ClinicalBERT"
+  optional_comparison: "bert-base-uncased"
   max_length: 128
   batch_size: 32
+  eval_batch_size: 64
   epochs: 5
-  learning_rate: 2e-5
-  warmup_steps: 500
+  learning_rate: 2.0e-5
+  warmup_ratio: 0.06
   weight_decay: 0.01
+  fp16: true
+  metric_for_best_model: "macro_f1"
   output_dir: "models/transformers/"
 
 evaluation:
+  primary_metric: "macro_f1"
   metrics:
-    - accuracy
-    - weighted_f1
-    - macro_f1
-    - cohen_kappa
-    - confusion_matrix
-    - roc_auc
+    - "accuracy"
+    - "weighted_f1"
+    - "macro_f1"
+    - "cohen_kappa"
+  statistical_tests:
+    mcnemar: true
+    paired_bootstrap:
+      n_boot: 1000
+      group_column: "abstract_id"
+      confidence_interval: 0.95
+      bonferroni_comparisons: 3
   results_dir: "results/metrics/"
   figures_dir: "results/figures/"
+  reports_dir: "results/reports/"
