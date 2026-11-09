@@ -1,4 +1,0 @@
-Fairness_Dimension,Subgroup_A,Subgroup_B,Metric_Subgroup_A,Metric_Subgroup_B,Disparity_Ratio_Baseline_BERT,Disparity_Ratio_Improved_SOTA,Fairness_Improvement_Assessment
-"Class Imbalance Representation","Minority Role (OBJECTIVE - 7.7%)","Majority Role (METHODS - 33.0%)","Recall: 0.614 -> 0.735","Recall: 0.950 -> 0.962","0.646 (Severe Disparity)","0.764 (Reduced Disparity)","+18.3% relative boost in minority representation equality"
-"Discourse Position Boundary","Abstract Boundaries (d=0, d=9)","Abstract Interior (d=2 to d=7)","Acc: 0.814 -> 0.891","Acc: 0.894 -> 0.932","0.911 (Disparity)","0.956 (Near Parity)","+4.9% relative convergence toward positional equity"
-"Syntactic / Sentence Length","Short Sentences (Q1: <=86 chars)","Long Sentences (Q4: >=197 chars)","Acc: 0.851 -> 0.896","Acc: 0.874 -> 0.909","0.974 (Mild Disparity)","0.986 (Equitable)","+1.2% parity alignment across sentence complexities"

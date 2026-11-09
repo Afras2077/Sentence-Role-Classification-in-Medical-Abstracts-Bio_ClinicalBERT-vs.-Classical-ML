@@ -29,12 +29,12 @@ This directory contains the interactive Jupyter notebooks for Project **F26-07**
 
 ### 3. `F26-07_improved_transformer.ipynb`
 - **Phase 4 State-of-the-Art Transformer Pipeline Notebook**.
-- Implemented for Google Colab (Tesla T4 GPU).
+- Self-contained, 100% live execution notebook for Google Colab (Tesla T4 GPU).
 - Incorporates:
   1. **Position-Conditioned Prompting:** Injects `[LINE i OF n] [PCT p%] <text>` to close the structural feature gap.
   2. **Domain-Pretrained Backbone (PubMedBERT):** Uses `microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract` trained on 14M PubMed abstracts.
   3. **Class-Weighted Cross-Entropy:** Inverse class weighting ($w_j = N / (K \cdot n_j)$) eliminating minority `OBJECTIVE` recall collapse.
-  4. **Comprehensive 7-Model Benchmark:** Evaluates Accuracy (0.9084), Weighted F1 (0.9081), Macro F1 (0.8732), and Cohen's Kappa (0.8765).
-  5. **Rigorous Error Analysis:** Analyzes accuracy across 10 position deciles ($d=0 \dots 9$) and 4 sentence length quartiles.
-  6. **Algorithmic Bias & Fairness Audit:** Audits minority recall parity, position boundary equity, and sentence complexity bias.
-  7. **Clinical RAG Integration:** Evidence-filtering module to eliminate clinical LLM hallucinations.
+  4. **Live Metric Computation:** Directly computes Accuracy, Weighted F1, Macro F1, and Cohen's Kappa from model predictions on the 30,135 test sentences.
+  5. **Diagnostic Error Analysis:** Analyzes accuracy across 10 position deciles ($d=0 \dots 9$) and 4 sentence length quartiles.
+  6. **Algorithmic Bias & Fairness Audit:** Computes minority recall parity, position boundary equity, and sentence length disparity ratios.
+  7. **Direct CSV Export:** Saves all computed results to disk without hardcoded or synthesized values.

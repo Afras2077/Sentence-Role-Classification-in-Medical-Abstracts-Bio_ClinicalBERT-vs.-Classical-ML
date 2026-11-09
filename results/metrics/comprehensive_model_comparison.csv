@@ -1,9 +1,0 @@
-Model_Architecture,Modality_Features,Test_Accuracy,Weighted_F1,Macro_F1,Cohen_Kappa,Dev_Macro_F1,Train_Time_s,Inference_s_per_1k,Parameters,Hardware
-"Random Forest","TF-IDF (20k)",0.7722,0.7726,0.7135,0.6946,0.723,159.8,0.067,~12.4M,CPU
-XGBoost,"TF-IDF (20k)",0.7862,0.7891,0.7305,0.7149,0.7392,78.6,0.045,~1.8M,CPU
-"Logistic Regression (SGD)","TF-IDF (200k)",0.8236,0.8232,0.763,0.763,0.7733,9.3,0.073,1.0M,CPU
-"LogReg + Position (Extension)","TF-IDF (200k) + Structural",0.8792,0.8788,0.8295,0.8378,0.8329,11.7,0.073,1.0M,CPU
-"Bio_ClinicalBERT (Baseline)","Text Only",0.8698,0.8689,0.8143,0.8247,0.8253,4999.7,1.656,108.3M,"GPU (T4)"
-"PubMedBERT (Domain Pre-trained)","Text Only",0.8845,0.8839,0.8368,0.8443,0.839,4890.2,1.64,108.9M,"GPU (T4)"
-"Bio_ClinicalBERT + Position Prompts","Text + Position Conditioning",0.8912,0.8906,0.8491,0.8532,0.8514,5120.4,1.682,108.3M,"GPU (T4)"
-"PubMedBERT + Position + Weighted Loss (SOTA)","Text + Position + Balanced Weights",0.9084,0.9081,0.8732,0.8765,0.8756,5040.1,1.675,108.9M,"GPU (T4)"

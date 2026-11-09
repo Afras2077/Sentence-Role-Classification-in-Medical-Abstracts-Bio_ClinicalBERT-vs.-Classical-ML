@@ -1,5 +1,0 @@
-Quartile_Category,Char_Length_Range,Mean_Words,Sentence_Count,Baseline_BERT_Accuracy,Improved_SOTA_Accuracy,Accuracy_Gain
-"Q1 (Shortest Sentences)","[8, 86]","9.8 words",7534,0.8512,0.8964,+0.0452
-"Q2 (Medium-Short Sentences)","[87, 134]","17.4 words",7534,0.8741,0.9122,+0.0381
-"Q3 (Medium-Long Sentences)","[135, 196]","25.2 words",7534,0.8795,0.9158,+0.0363
-"Q4 (Longest Sentences)","[197, 684]","38.6 words",7533,0.8744,0.9092,+0.0348
