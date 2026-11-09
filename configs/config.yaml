@@ -115,6 +115,7 @@ classical_models:
 
 transformer_models:
   base_model: "emilyalsentzer/Bio_ClinicalBERT"
+  improved_model: "microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract"
   optional_comparison: "bert-base-uncased"
   max_length: 128
   batch_size: 32
@@ -126,6 +127,29 @@ transformer_models:
   fp16: true
   metric_for_best_model: "macro_f1"
   output_dir: "models/transformers/"
+  improvements:
+    position_conditioning:
+      enabled: true
+      prompt_template: "[LINE {line_number} OF {total_lines}] [PCT {pct}%] {text}"
+    class_weighting:
+      enabled: true
+      mode: "balanced"
+    domain_adaptation:
+      enabled: true
+      target_backbone: "microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract"
+    hybrid_fusion:
+      structural_dim: 14
+      fusion_dim: 128
+      dropout: 0.2
+
+rag_clinical_indexing:
+  role: "Upstream semantic chunk filter for Medical Evidence-Synthesis RAG"
+  chunk_strategy: "role_annotated_sentence"
+  evidence_roles: ["RESULTS", "CONCLUSIONS"]
+  hallucination_control:
+    exclude_speculative_roles: ["BACKGROUND"]
+    strict_system_prompt: true
+    min_evidence_f1: 0.85
 
 evaluation:
   primary_metric: "macro_f1"
@@ -140,7 +164,13 @@ evaluation:
       n_boot: 1000
       group_column: "abstract_id"
       confidence_interval: 0.95
-      bonferroni_comparisons: 3
+      bonferroni_comparisons: 5
+  fairness_audit:
+    enabled: true
+    subgroups:
+      - "minority_vs_majority_role"
+      - "sentence_length_quartiles"
+      - "abstract_boundary_vs_interior"
   results_dir: "results/metrics/"
   figures_dir: "results/figures/"
   reports_dir: "results/reports/"
