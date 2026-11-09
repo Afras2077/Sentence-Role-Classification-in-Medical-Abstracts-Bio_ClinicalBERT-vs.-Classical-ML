@@ -1,0 +1,5 @@
+Model_Pair_Comparison,Macro_F1_Difference,Bootstrap_95_CI,Discordant_Pairs_Baseline_Better,Discordant_Pairs_Improved_Better,McNemar_p_value,Statistically_Significant
+"SOTA PubMedBERT+Pos vs Bio_ClinicalBERT [text]",+0.0589,"[+0.0532, +0.0645]",584,1745,"< 1.0e-300","Yes (p < 0.001)"
+"SOTA PubMedBERT+Pos vs LogReg + Position",+0.0437,"[+0.0381, +0.0494]",712,1592,1.8e-94,"Yes (p < 0.001)"
+"Bio_ClinicalBERT+Pos vs Bio_ClinicalBERT [text]",+0.0348,"[+0.0294, +0.0401]",728,1372,3.1e-45,"Yes (p < 0.001)"
+"PubMedBERT [text] vs Bio_ClinicalBERT [text]",+0.0225,"[+0.0171, +0.0278]",892,1335,1.2e-21,"Yes (p < 0.001)"
