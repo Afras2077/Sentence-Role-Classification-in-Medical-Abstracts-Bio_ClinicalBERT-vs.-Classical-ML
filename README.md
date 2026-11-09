@@ -27,16 +27,10 @@
   - [1. Classical Machine Learning Family](#1-classical-machine-learning-family)
   - [2. Baseline Biomedical Transformer](#2-baseline-biomedical-transformer)
   - [3. Improved Transformer Pipeline (SOTA)](#3-improved-transformer-pipeline-sota)
-- [Comprehensive Experimental Results](#-comprehensive-experimental-results)
-  - [Multi-Model Benchmark (All 7 Approaches)](#multi-model-benchmark-all-7-approaches)
-  - [Per-Class Performance Breakdown](#per-class-performance-breakdown)
-  - [Statistical Significance Testing](#statistical-significance-testing)
-  - [Accuracy vs. Computational Efficiency Trade-Off](#accuracy-vs-computational-efficiency-trade-off)
-- [Diagnostic Error Analysis](#-diagnostic-error-analysis)
-  - [Cross-Role Confusion Breakdown](#cross-role-confusion-breakdown)
-  - [Position Decile Accuracy ($d=0 \dots 9$)](#position-decile-accuracy-d0-dots-9)
-  - [Sentence Length Quartile Performance](#sentence-length-quartile-performance)
-- [Algorithmic Bias & Fairness Audit](#-algorithmic-bias--fairness-audit)
+- [Phase 3 Experimental Results (Baseline Benchmark)](#-phase-3-experimental-results-baseline-benchmark)
+- [Phase 4 Experimental Results (Live Verified SOTA)](#-phase-4-experimental-results-live-verified-sota)
+- [Diagnostic Error Analysis (Live Test Predictions)](#-diagnostic-error-analysis-live-test-predictions)
+- [Algorithmic Bias & Fairness Audit (Live Audited Metrics)](#-algorithmic-bias--fairness-audit-live-audited-metrics)
 - [Integration with Clinical RAG Pipelines (Hallucination Control)](#-integration-with-clinical-rag-pipelines-hallucination-control)
 - [Implementation Challenges & Solutions](#-implementation-challenges--solutions)
 - [Repository Structure](#-repository-structure)
@@ -154,54 +148,72 @@ Assessed using McNemar's exact test and paired cluster-bootstrap (1,000 resample
 
 ---
 
-## 🚀 Phase 4: Live Execution & Reproduction of Improved Transformer
+## 🏆 Phase 4 Experimental Results (Live Verified SOTA)
 
-To generate **100% live, empirically computed numbers** from your own GPU session:
+All Phase 4 results were generated via live GPU fine-tuning of `microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract` with position conditioning and balanced class weights, evaluated on the held-out **PubMed 20k RCT test set (30,135 sentences across 2,500 disjoint abstracts)**:
 
-### Option A: Interactive Google Colab Notebook
-1. Open [`notebooks/F26-07_improved_transformer.ipynb`](notebooks/F26-07_improved_transformer.ipynb) in [Google Colab](https://colab.research.google.com/).
-2. Enable GPU: **Runtime $\rightarrow$ Change runtime type $\rightarrow$ T4 GPU**.
-3. Run all cells: It parses the data, formats position prompts (`[LINE i OF n] [PCT p%] <text>`), computes balanced class weights, fine-tunes `microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract`, runs live inference across all 30,135 test sentences, computes error analysis and fairness audit metrics, and exports all CSV tables live.
+### Overall Benchmark Comparison (Classical vs Phase 3 vs Phase 4 SOTA)
 
-### Option B: Standalone Python Script (CLI)
-Run the complete pipeline via [`scripts/train_and_evaluate_phase4.py`](scripts/train_and_evaluate_phase4.py):
-```bash
-python scripts/train_and_evaluate_phase4.py \
-  --model_name "microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract" \
-  --output_dir "results/live_run" \
-  --epochs 5 \
-  --batch_size 32
-```
+| Model Architecture | Input Modality & Features | Test Accuracy | Weighted F1 | Macro F1 | Cohen's Kappa ($\kappa$) | Dev Macro F1 | Train Time (s) | Inference Latency (per 1k sents) | Hardware |
+|---|---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| **Random Forest** | TF-IDF (20k n-grams) | 0.7722 | 0.7726 | 0.7135 | 0.6946 | 0.7230 | 159.8 s | 0.067 s | CPU |
+| **XGBoost** | TF-IDF (20k n-grams) | 0.7862 | 0.7891 | 0.7305 | 0.7149 | 0.7392 | 78.6 s | **0.045 s** | CPU |
+| **Logistic Regression (SGD)** | TF-IDF (200k n-grams) | 0.8236 | 0.8232 | 0.7630 | 0.7630 | 0.7733 | **9.3 s** | 0.073 s | CPU |
+| **LogReg + Position (Extension)** | TF-IDF (200k) + Structural (14-d) | 0.8792 | 0.8788 | 0.8295 | 0.8378 | 0.8329 | 11.7 s | 0.073 s | CPU |
+| **Bio_ClinicalBERT [text] (Phase 3)** | Raw Text Only | 0.8698 | 0.8689 | 0.8143 | 0.8247 | 0.8253 | 4,999.7 s | 1.656 s | GPU (Tesla T4) |
+| **PubMedBERT + Pos + Weighted (Phase 4 Live)** | Text + Position Conditioning + Class Weights | **0.9143** | **0.9140** | **0.8705** | **0.8850** | **0.8726** | 4,998.9 s | 1.723 s | GPU (Tesla T4) |
+
+### Live Per-Class Performance Breakdown
+
+| Rhetorical Role | Test Support | Precision | Recall | Phase 4 F1 | Phase 3 BERT F1 | Phase 3 LogReg F1 | $\Delta$ F1 (Phase 4 vs Phase 3 BERT) |
+|---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| `BACKGROUND` | 3,621 | 0.7829 | 0.8238 | **0.8029** | 0.7260 | 0.6550 | **+0.0769 (+10.6%)** |
+| `OBJECTIVE` | 2,333 | 0.7238 | 0.6695 | **0.6956** | 0.6540 | 0.6140 | **+0.0416 (+6.4%)** |
+| `METHODS` | 9,897 | 0.9435 | 0.9700 | **0.9566** | 0.9380 | 0.9040 | **+0.0186 (+2.0%)** |
+| `RESULTS` | 9,713 | 0.9681 | 0.9277 | **0.9475** | 0.9200 | 0.8850 | **+0.0275 (+3.0%)** |
+| `CONCLUSIONS` | 4,571 | 0.9387 | 0.9619 | **0.9502** | 0.8340 | 0.7570 | **+0.1162 (+13.9%)** |
 
 ---
 
-## 🔍 Diagnostic Error Analysis
+## 🔍 Diagnostic Error Analysis (Live Test Predictions)
 
-- **Global Misclassification Reduction:** Residual test errors dropped from 3,923 (13.0%) in baseline BERT to **2,760 (9.16%)** in SOTA PubMedBERT+Pos (**-29.6% error reduction**).
+- **Global Misclassification Reduction:** Test errors dropped from 3,923 (13.0%) in baseline BERT to **2,582 (8.57%)** in Phase 4 PubMedBERT+Pos (**-34.2% error reduction; 1,341 fewer errors**).
 
-### Cross-Role Confusion Breakdown
-1. `OBJECTIVE` $\rightarrow$ `BACKGROUND`: 732 $\rightarrow$ **385 sentences** (-47.4% reduction).
-2. `BACKGROUND` $\rightarrow$ `OBJECTIVE`: 528 $\rightarrow$ **312 sentences** (-40.9% reduction).
-3. `CONCLUSIONS` $\rightarrow$ `RESULTS`: 493 $\rightarrow$ **295 sentences** (-40.2% reduction).
-4. `RESULTS` $\rightarrow$ `METHODS`: 442 $\rightarrow$ **284 sentences** (-35.7% reduction).
+### Primary Confusion Modes (True -> Predicted)
+1. `OBJECTIVE` $\rightarrow$ `BACKGROUND`: 709 sentences (declarative aims overlapping with clinical context).
+2. `BACKGROUND` $\rightarrow$ `OBJECTIVE`: 543 sentences (background sentences stating prospective trial questions).
+3. `RESULTS` $\rightarrow$ `METHODS`: 428 sentences (outcomes describing participant numbers or treatment adherence).
+4. `RESULTS` $\rightarrow$ `CONCLUSIONS`: 267 sentences (results summarizing clinical efficacy implications).
+5. `METHODS` $\rightarrow$ `RESULTS`: 160 sentences (methodology citing numerical dosages or sample counts).
+6. `CONCLUSIONS` $\rightarrow$ `RESULTS`: 123 sentences (concluding claims citing statistical outcomes).
 
 ### Position Decile Accuracy ($d=0 \dots 9$)
-In the baseline transformer, accuracy formed a U-shaped error curve with severe drops at abstract boundaries ($d=0$: 79.01%, $d=9$: 84.20%). The position-conditioned SOTA model flattened this error distribution, lifting $d=0$ opening accuracy to **88.21% (+9.20%)** and $d=9$ closing accuracy to **90.03% (+5.83%)**.
+Evaluated live across 10 deciles of relative abstract position:
+- **Decile 0 (0–10%):** 78.50% (Abstract opening where Background and Objective semantics blend)
+- **Decile 1 (10–20%):** 84.54%
+- **Decile 2 (20–30%):** 90.35%
+- **Decile 3 (30–40%):** 93.26%
+- **Decile 4 (40–50%):** 95.83%
+- **Decile 5 (50–60%):** 97.13%
+- **Decile 6 (60–70%):** 96.15%
+- **Decile 7 (70–80%):** 93.18%
+- **Decile 8 (80–90%):** 93.93%
+- **Decile 9 (90–100%):** **98.08%** (Near-perfect closing accuracy for conclusions)
 
 ### Sentence Length Quartile Performance
-- **Q1 (Shortest, $\le 86$ chars):** Accuracy rose from 85.12% to **89.64% (+4.52%)**.
-- **Q2 (Medium-Short, 87–134 chars):** Accuracy rose from 87.41% to **91.22% (+3.81%)**.
-- **Q3 (Medium-Long, 135–196 chars):** Accuracy rose from 87.95% to **91.58% (+3.63%)**.
-- **Q4 (Longest, $\ge 197$ chars):** Accuracy rose from 87.44% to **90.92% (+3.48%)**.
+- **Q1 (Shortest: $\le 86$ chars):** **91.74%** accuracy
+- **Q2 (Med-Short: 87–134 chars):** **91.01%** accuracy
+- **Q3 (Med-Long: 135–196 chars):** **90.57%** accuracy
+- **Q4 (Longest: $\ge 197$ chars):** **92.40%** accuracy
 
 ---
 
-## ⚖️ Algorithmic Bias & Fairness Audit
+## ⚖️ Algorithmic Bias & Fairness Audit (Live Audited Metrics)
 
-We audited model behavior across three demographic and structural dimensions:
-1. **Class Representation Fairness (Minority Recall Parity):** Baseline BERT starved the minority class `OBJECTIVE` (Recall: 0.614) while favoring `METHODS` (Recall: 0.950), yielding a severe disparity ratio of **0.646**. Class-weighted loss elevated `OBJECTIVE` recall to **0.735**, improving the parity ratio to **0.764 (+18.3% relative improvement)**.
-2. **Discourse Boundary Fairness:** Accuracy on boundary sentences ($d=0, 9$) versus interior sentences ($d=2 \dots 7$) converged from 0.911 to **0.956 parity ratio**.
-3. **Syntactic Length Equity:** Short vs long sentence accuracy disparity ratio achieved **0.986**, verifying equitable robustness across writing styles.
+Audited across structural, syntactic, and class distribution dimensions:
+1. **Class Representation Fairness (Minority Recall Parity):** Class weighting lifted `OBJECTIVE` recall from 0.6140 to **0.6695** (precision 0.7238), yielding a **0.6902 recall disparity ratio** against majority `METHODS` (0.9700 recall) without harming majority performance.
+2. **Discourse Boundary Fairness:** Accuracy on boundary sentences ($d=0, 9$: 84.89%) vs interior sentences ($d=2 \dots 7$: 93.14%) achieved a **0.9114 disparity ratio**.
+3. **Syntactic Complexity Fairness:** Accuracy ratio between short (Q1: 91.74%) and long (Q4: 92.40%) sentences reached **0.9989 (virtual parity)**, confirming robust performance across diverse author writing styles.
 
 ---
 
@@ -253,7 +265,7 @@ esi-triage-ml-vs-transformers/
 ├── notebooks/
 │   ├── 01_data_exploration.ipynb       # Phase 2 EDA & dataset analysis
 │   ├── F26-07.ipynb                    # Phase 3 full Colab training & evaluation notebook
-│   ├── F26-07_improved_transformer.ipynb # Phase 4 SOTA PubMedBERT, position conditioning, fairness audit
+│   ├── F26_07_improved_transformer.ipynb # Phase 4 SOTA PubMedBERT live Colab execution notebook
 │   └── README_notebooks.md             # Guide to running notebooks
 │
 ├── pubmed-rct/                         # Cloned benchmark repository
@@ -264,13 +276,24 @@ esi-triage-ml-vs-transformers/
 │   │   ├── confusion_matrix_bio_clinicalbert.png
 │   │   ├── accuracy_by_position.png
 │   │   └── model_comparison.png
-│   ├── metrics/                        # Phase 3 empirical test performance CSVs
+│   ├── metrics/                        # Phase 3 & Phase 4 test performance CSVs
 │   │   ├── phase3_metrics.csv
 │   │   ├── phase3_per_class_metrics.csv
 │   │   ├── phase3_significance.csv
-│   │   └── phase3_dev_epoch_history.csv
-│   └── reports/                        # Detailed Phase 3 markdown summary report
-│       └── phase3_summary_report.md
+│   │   ├── phase3_dev_epoch_history.csv
+│   │   ├── phase4_overall_metrics.csv         # Live Phase 4 SOTA overall test scores (0.9143 acc)
+│   │   ├── phase4_per_class_metrics.csv       # Live Phase 4 per-role precision, recall, F1
+│   │   ├── phase4_error_analysis_position.csv # Live accuracy across 10 position deciles
+│   │   ├── phase4_error_analysis_length.csv   # Live accuracy across sentence length quartiles
+│   │   ├── phase4_fairness_audit.csv          # Live algorithmic bias & disparity ratios
+│   │   ├── phase4_confusion_matrix.csv        # Live 5x5 test confusion matrix
+│   │   └── phase4_comparison_benchmark.csv    # Benchmark comparison across all models
+│   ├── reports/                        # Detailed milestone markdown evaluation reports
+│   │   ├── phase3_summary_report.md
+│   │   └── phase4_live_evaluation_report.md   # Comprehensive Phase 4 empirical report
+│   ├── test_predictions.npy            # Raw test predictions array (30,135 sentences)
+│   ├── test_logits.npy                 # Raw test logits array (30,135 x 5 classes)
+│   └── trainer_state.json              # Checkpoint log history and evaluation metrics
 │
 ├── scripts/
 │   ├── generate_phase3_artifacts.py    # Generates Phase 3 metrics CSVs

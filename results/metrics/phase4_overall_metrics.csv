@@ -1,0 +1,2 @@
+Model,Test_Accuracy,Weighted_F1,Macro_F1,Cohen_Kappa,Train_Time_s,Inference_s_per_1k,Hardware
+PubMedBERT + Position + Weighted Loss,0.9143,0.914,0.8705,0.885,4998.9,1.723,Tesla T4

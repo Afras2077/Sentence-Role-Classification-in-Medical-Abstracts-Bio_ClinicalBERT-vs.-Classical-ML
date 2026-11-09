@@ -1,0 +1,7 @@
+Model,Modality,Test_Accuracy,Weighted_F1,Macro_F1,Cohen_Kappa,Dev_Macro_F1,Train_Time_s,Infer_s_per_1k,Hardware
+Random Forest,TF-IDF (20k),0.7722,0.7726,0.7135,0.6946,0.7230,159.8,0.067,CPU
+XGBoost,TF-IDF (20k),0.7862,0.7891,0.7305,0.7149,0.7392,78.6,0.045,CPU
+LogReg (SGD),TF-IDF (200k),0.8236,0.8232,0.7630,0.7630,0.7733,9.3,0.073,CPU
+LogReg + Position (Extension),TF-IDF (200k) + Structural,0.8792,0.8788,0.8295,0.8378,0.8329,11.7,0.073,CPU
+Bio_ClinicalBERT [text] (Phase 3),Text Only,0.8698,0.8689,0.8143,0.8247,0.8253,4999.7,1.656,GPU (Tesla T4)
+PubMedBERT + Position + Weighted Loss (Phase 4 Live),Text + Position + Balanced Weights,0.9143,0.9140,0.8705,0.8850,0.8726,4998.9,1.723,GPU (Tesla T4)

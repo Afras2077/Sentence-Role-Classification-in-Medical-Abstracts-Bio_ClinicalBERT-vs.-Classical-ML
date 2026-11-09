@@ -27,7 +27,7 @@ This directory contains the interactive Jupyter notebooks for Project **F26-07**
   6. **Error Analysis**:
      - Confusion matrices and error distribution across sentence position deciles.
 
-### 3. `F26-07_improved_transformer.ipynb`
+### 3. `F26_07_improved_transformer.ipynb`
 - **Phase 4 State-of-the-Art Transformer Pipeline Notebook**.
 - Self-contained, 100% live execution notebook for Google Colab (Tesla T4 GPU).
 - Incorporates:

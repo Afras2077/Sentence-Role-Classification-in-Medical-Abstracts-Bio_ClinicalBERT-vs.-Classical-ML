@@ -26,6 +26,9 @@ models/classical/*.pkl
 models/classical/*.joblib
 !models/classical/.gitkeep
 !models/transformers/.gitkeep
+results/*.pt
+results/*.pth
+results/*.bin
 
 # MLflow
 mlruns/

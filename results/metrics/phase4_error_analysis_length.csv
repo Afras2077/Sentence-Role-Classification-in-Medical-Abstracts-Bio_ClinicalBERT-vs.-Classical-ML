@@ -1,0 +1,5 @@
+Length_Quartile,Total_Sentences,Accuracy,Error_Rate
+Q1 (Shortest),7655,0.9174,0.0826
+Q2 (Med-Short),7427,0.9101,0.0899
+Q3 (Med-Long),7540,0.9057,0.0943
+Q4 (Longest),7513,0.924,0.076

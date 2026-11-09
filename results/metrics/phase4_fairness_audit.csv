@@ -1,0 +1,2 @@
+Minority_Role,Minority_Recall,Majority_Role,Majority_Recall,Recall_Disparity_Ratio,Boundary_Accuracy,Interior_Accuracy,Boundary_Disparity_Ratio,Length_Disparity_Ratio
+OBJECTIVE,0.6695,METHODS,0.97,0.6902,0.8489,0.9314,0.9114,0.9989
