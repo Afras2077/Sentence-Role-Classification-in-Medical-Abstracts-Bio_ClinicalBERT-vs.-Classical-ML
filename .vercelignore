@@ -1,0 +1,7 @@
+requirements.txt
+notebooks/
+results/
+src/
+*.py
+*.ipynb
+docs/
