@@ -133,3 +133,4 @@ In clinical Evidence-Synthesis RAG systems, this classifier functions as the **u
 1. **Semantic Chunking:** Abstracts are partitioned into rhetorical functional units rather than arbitrary token lengths.
 2. **Exclusion of Speculative Context:** `BACKGROUND` sentences are filtered out prior to vector indexing, preventing generative LLMs from mistaking clinical rationale or prior unverified studies for empirical trial outcomes.
 3. **Evidence Grounding:** Retrieved evidence is strictly constrained to chunks tagged as `RESULTS` and `CONCLUSIONS`, guaranteeing that downstream answer synthesis is grounded solely in verified clinical findings.
+

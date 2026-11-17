@@ -1,0 +1,930 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Sentence Roles in Medical Abstracts</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400..700&family=IBM+Plex+Mono:wght@400;500&family=Literata:opsz,wght@7..72,400..700&display=swap">
+<style>
+/* Layout: sticky pill menu over a long single column; one pinned scroll-driven walkthrough in the middle. */
+:root{
+--bg:#F4F7F5;--s:#FFFFFF;--s2:#E6EDE9;--ln:rgba(20,50,40,.15);
+--t1:#14201C;--t2:#34463F;--t3:#52645D;
+--ac:#0B6B63;--acs:#D8EFEA;
+--c0:#8A3F8F;--c1:#D44A3A;--c2:#6D8F1F;--c3:#D08A0C;--c4:#7A5638;
+--hl:24%;--sh:none;
+--fd:"Literata",Georgia,serif;--fb:"Hanken Grotesk",system-ui,sans-serif;--fm:"IBM Plex Mono",ui-monospace,monospace;
+--e:cubic-bezier(.2,.7,.2,1);--hh:60px}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0F1A17;--s:#16251F;--s2:#203129;--ln:rgba(180,230,215,.18);--t1:#EDF5F1;--t2:#C6D8D0;--t3:#9DB5AA;--ac:#4FD1BF;--acs:#173A34;--c0:#D58BD6;--c1:#FF8A78;--c2:#A8CC4A;--c3:#F2B84B;--c4:#D0A27E;--hl:34%;--sh:none;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0F1A17;--s:#16251F;--s2:#203129;--ln:rgba(180,230,215,.18);--t1:#EDF5F1;--t2:#C6D8D0;--t3:#9DB5AA;--ac:#4FD1BF;--acs:#173A34;--c0:#D58BD6;--c1:#FF8A78;--c2:#A8CC4A;--c3:#F2B84B;--c4:#D0A27E;--hl:34%;--sh:none;color-scheme:dark}
+html{scroll-padding-top:calc(var(--hh) + 8px);scroll-behavior:smooth}
+*{box-sizing:border-box;margin:0}
+body{background:var(--bg);color:var(--t1);font:400 17px/1.6 var(--fb);overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:60}
+.wrap{max-width:1120px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.m{font:500 12px/1.4 var(--fm);color:var(--t3)}.n{font-variant-numeric:tabular-nums}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;text-align:left}
+:focus-visible{outline:2px solid var(--ac);outline-offset:2px;border-radius:6px}
+.d{width:9px;height:9px;border-radius:50%;background:var(--c);display:inline-block;flex:none}
+/* header */
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:50;background:color-mix(in srgb,var(--bg) 90%,transparent);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-bottom:1px solid var(--ln)}
+.hd{display:flex;align-items:center;gap:16px;min-height:60px}
+.brand{display:flex;flex-direction:column;line-height:1.15;text-decoration:none;color:var(--t1);margin-right:auto}
+.brand{white-space:nowrap;flex:none}.brand b{font:700 19px var(--fd);letter-spacing:-.01em}.brand span{font:500 11px var(--fm);color:var(--t3);letter-spacing:.04em;text-transform:uppercase}
+.nav{display:flex;gap:2px;position:relative;padding:4px;border-radius:999px;background:var(--s);border:1px solid var(--ln);box-shadow:var(--sh);scrollbar-width:none}
+.nav::-webkit-scrollbar{display:none}
+.nav a{position:relative;z-index:1;display:flex;align-items:center;gap:8px;padding:8px 14px;border-radius:999px;font:600 14px/1 var(--fb);color:var(--t2);text-decoration:none;white-space:nowrap;transition:color .15s var(--e),background-color .15s var(--e)}
+.nav a:hover{color:var(--t1);background:color-mix(in srgb,var(--c) 12%,transparent)}
+.nav a[aria-current=true]{color:var(--t1)}
+.ind{position:absolute;left:0;top:4px;bottom:4px;width:0;border-radius:999px;background:color-mix(in srgb,var(--c,var(--ac)) 22%,var(--s));box-shadow:inset 0 0 0 1.5px var(--c,var(--ac));transition:transform .4s var(--e),width .4s var(--e),background-color .3s,box-shadow .3s;z-index:0}
+.chip{font:500 12px var(--fm);color:var(--t2);background:var(--s);border:1px solid var(--ln);border-radius:999px;padding:6px 12px;white-space:nowrap}
+.ib{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:var(--s);border:1px solid var(--ln);color:var(--t1);transition:background-color .15s var(--e)}
+.ib:hover{background:var(--s2)}
+.prog{height:3px;background:transparent;position:relative}.prog i{position:absolute;inset:0;transform-origin:left;transform:scaleX(0);background:linear-gradient(90deg,var(--c0),var(--c1),var(--c2),var(--c3),var(--c4))}
+/* type */
+main{padding-bottom:40px}
+.sec{padding-top:96px;display:flex;flex-direction:column;gap:24px}
+.tag{display:flex;align-items:center;gap:10px;font:600 13px var(--fm);color:var(--t1);text-transform:uppercase;letter-spacing:.06em}
+.tag i{width:28px;height:6px;border-radius:3px;background:var(--c)}
+h1{font:700 clamp(40px,6.4vw,76px)/1 var(--fd);letter-spacing:-.025em;max-width:15ch;text-wrap:balance}
+h2{font:700 clamp(28px,4vw,44px)/1.1 var(--fd);letter-spacing:-.02em;max-width:22ch;text-wrap:balance}
+.u{background:linear-gradient(transparent 60%,color-mix(in srgb,var(--c1) 60%,transparent) 60%);padding:0 .05em}
+p.lead{color:var(--t2);max-width:62ch;font-size:19px}p.b{color:var(--t2);max-width:64ch}
+.card{background:var(--s);border:1px solid var(--ln);border-radius:20px;box-shadow:var(--sh)}
+/* specimen */
+.spec{display:grid;grid-template-columns:1fr 300px;overflow:hidden}
+.ab{padding:24px;border-right:1px solid var(--ln);display:flex;flex-direction:column;min-width:0}
+.bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;gap:16px;flex-wrap:wrap}
+.seg{display:flex;background:var(--s2);border-radius:12px;padding:3px;flex-wrap:wrap}
+.seg button{padding:6px 14px;border-radius:9px;font:600 13px var(--fb);color:var(--t2);transition:background-color .15s var(--e),color .15s var(--e)}
+.seg button:hover{color:var(--t1)}
+.seg button[aria-pressed=true]{background:var(--s);color:var(--t1);box-shadow:0 0 0 1px var(--ln),0 2px 6px rgba(10,22,51,.08)}
+.ls{display:grid;grid-template-columns:96px 1fr;gap:0 16px;width:100%;padding:8px 8px 8px 0;border-radius:10px;align-items:start}
+.ls .mg{font:500 11px/26px var(--fm);color:var(--t3);border-right:4px solid var(--c);padding-right:12px;text-align:right;height:100%}
+.ls.f .mg{color:var(--t1)}
+.ls .tx{border-radius:8px;padding:0 6px;margin:0 -6px;line-height:26px;transition:background-color .15s var(--e)}
+.ls:hover .tx{background:color-mix(in srgb,var(--c) 18%,transparent)}
+.ls[aria-pressed=true] .tx{background:color-mix(in srgb,var(--c) var(--hl),transparent)}
+.ls code{display:block;font:500 11px/16px var(--fm);color:var(--t3);height:0;opacity:0;overflow:hidden;transition:opacity .2s var(--e),height .2s var(--e)}
+.pm .ls code{height:16px;opacity:1}
+.pnl{padding:24px;display:flex;flex-direction:column;gap:16px;font-size:14px;line-height:1.5;min-width:0}
+.pnl h3{font:700 16px var(--fd)}
+.pnl code{font:500 12px/1.5 var(--fm);color:var(--t1);background:var(--s2);border-radius:10px;padding:10px 12px;display:block;word-break:break-word}
+.kv{display:flex;justify-content:space-between;align-items:baseline;color:var(--t2);gap:8px}.kv b{font-weight:700;color:var(--t1)}
+.mt{height:8px;border-radius:4px;background:var(--s2);margin-top:4px;overflow:hidden}.mt i{display:block;height:100%;background:var(--c,var(--ac));border-radius:4px;transition:width .3s var(--e)}
+.strip{display:flex;align-items:flex-end;gap:4px;height:48px;margin-top:6px}.strip i{flex:1;background:var(--s2);border-radius:3px 3px 0 0;transition:background-color .2s var(--e)}.strip i.on{background:var(--ac)}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr)}.grid3>div{padding:24px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.grid3 h3{font:700 20px var(--fd)}.grid3 p{color:var(--t2);font-size:15px;line-height:1.5}
+.grid3 code,.code{font:500 12px/1.5 var(--fm);background:var(--s2);border-radius:8px;padding:6px 10px;color:var(--t1);width:fit-content;max-width:100%;word-break:break-word}
+.w{display:grid;grid-template-columns:96px 1fr 40px;gap:8px;align-items:center;font:500 12px var(--fm);color:var(--t2)}
+.rqs{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.rqs>div{padding:20px;display:flex;flex-direction:column;gap:6px}
+.rqs b{font:700 15px var(--fm);color:var(--ac)}.rqs p{font-size:15px;line-height:1.45;color:var(--t1)}
+/* walkthrough */
+#how-it-works{width:100vw;position:relative;left:50%;right:50%;margin-left:-50vw;margin-right:-50vw;padding:28px 0 0}
+.hiw-head{max-width:1120px;margin:0 auto 20px;padding:0 max(20px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:10px}
+.track{height:680svh;position:relative;width:100%}
+.pin{position:sticky;top:0;width:100vw;height:100vh;height:100svh;display:flex;align-items:center;justify-content:center;padding:calc(var(--hh) + 8px) clamp(14px,3.5vw,40px) 14px;box-sizing:border-box;background:var(--bg);z-index:40}
+.stg{width:100%;max-width:1360px;height:100%;max-height:calc(100svh - var(--hh) - 20px);min-height:560px;display:flex;flex-direction:column;border-radius:22px;border:1px solid var(--ln);background:var(--s);box-shadow:0 25px 70px -15px rgba(10,32,26,.15),0 0 0 1px var(--ln);overflow:hidden;position:relative}
+
+/* Step Navigation Bar */
+.stg-head{padding:12px 18px 0;display:flex;flex-direction:column;gap:8px;border-bottom:1px solid var(--ln);background:color-mix(in srgb,var(--s) 92%,var(--s2))}
+.steps{display:flex;gap:6px;list-style:none;padding:0;margin:0}
+.steps li{flex:1;min-width:0}
+.steps button{display:flex;align-items:center;gap:8px;width:100%;padding:7px 10px;border-radius:10px;font:600 13px/1.2 var(--fb);color:var(--t2);transition:background-color .15s var(--e),color .15s var(--e)}
+.steps button:hover{background:var(--s2);color:var(--t1)}
+.steps b{flex:none;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:var(--s2);font:600 11px var(--fm);color:var(--t1);transition:all .2s}
+.steps button.done b{background:color-mix(in srgb,var(--ac) 28%,var(--s2));color:var(--t1)}
+.steps button[aria-current=step]{background:var(--acs);color:var(--t1);box-shadow:inset 0 0 0 1.5px var(--ac)}
+.steps button[aria-current=step] b{background:var(--ac);color:#fff}
+.sbar{height:3px;background:color-mix(in srgb,var(--ln) 40%,transparent);border-radius:2px;overflow:hidden}
+.sbar i{display:block;height:100%;width:100%;background:linear-gradient(90deg,var(--ac),var(--c3));transform-origin:left;transform:scaleX(0)}
+
+/* Continuous Canvas & Scene */
+.stage-canvas{flex:1;min-height:0;position:relative;overflow:hidden;padding:14px 22px;background:color-mix(in srgb,var(--s) 98%,var(--s2));display:flex;flex-direction:column;justify-content:center}
+.scene-wrap{position:relative;width:100%;height:100%;min-height:0;display:flex;flex-direction:column;justify-content:center}
+.layer-sec{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;gap:12px;transition:opacity .25s var(--e),transform .3s var(--e);will-change:opacity,transform;pointer-events:none}
+.layer-sec.active{pointer-events:auto}
+
+/* Layer 1: Abstract Sentences + Hero Preprocessing */
+.abs-stack{display:flex;flex-direction:column;gap:4px;max-width:960px;margin:0 auto;width:100%;transition:opacity .3s var(--e),max-height .35s var(--e)}
+.abs-row{display:grid;grid-template-columns:30px 1fr;gap:12px;align-items:center;padding:5px 12px;border-radius:8px;font:400 15px/1.4 var(--fd);color:var(--t3);overflow:hidden;transition:max-height .35s var(--e),opacity .3s var(--e),padding .35s var(--e),margin .35s var(--e),background-color .2s}
+.abs-row b{font:600 12px var(--fm);color:var(--t3)}
+.abs-row span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.abs-row.hero{color:var(--t1);font-weight:500;background:color-mix(in srgb,var(--c3) 14%,var(--s));box-shadow:inset 0 0 0 1.5px var(--c3)}
+.abs-row.hero b{color:var(--c3)}
+.abs-row.collapse{max-height:0!important;opacity:0!important;padding-top:0!important;padding-bottom:0!important;margin:0!important;pointer-events:none}
+
+.hero-card{max-width:960px;width:100%;margin:0 auto;padding:18px 24px;border-radius:16px;background:var(--s);border:1px solid var(--ln);box-shadow:0 10px 30px rgba(0,0,0,.06);display:flex;flex-direction:column;gap:12px;transition:opacity .3s var(--e),transform .3s var(--e),max-height .35s var(--e);overflow:hidden}
+.hero-top{display:flex;align-items:center;justify-content:space-between}
+.stage-badge{font:600 12px var(--fm);text-transform:uppercase;letter-spacing:.06em;padding:3px 10px;border-radius:999px;background:var(--acs);color:var(--ac)}
+.hero-sentence-line{font:500 19px/1.5 var(--fd);color:var(--t1);display:flex;flex-wrap:wrap;align-items:baseline;gap:8px}
+.prefix-capsule{display:inline-flex;gap:6px;flex-wrap:nowrap;transition:opacity .3s var(--e),transform .3s var(--e)}
+.p-chip{font:600 12px/1 var(--fm);padding:4px 8px;border-radius:6px;letter-spacing:.02em;background:color-mix(in srgb,var(--c4) 22%,var(--s));color:var(--c4);border:1px solid color-mix(in srgb,var(--c4) 38%,transparent)}
+.prep-checklist{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:4px;padding-top:10px;border-top:1px solid var(--ln)}
+.prep-item{display:flex;align-items:center;gap:8px;font:500 13px var(--fb);color:var(--t3);transition:color .2s var(--e)}
+.chk-icon{width:18px;height:18px;border-radius:50%;display:grid;place-items:center;background:var(--s2);color:transparent;font-size:11px;font-weight:700;transition:background-color .2s,color .2s}
+.prep-item.active{color:var(--t1)}
+.prep-item.active .chk-icon{background:var(--c2);color:#fff}
+
+/* Layer 2: Tokens & Embeddings */
+.tokens-header{display:flex;align-items:center;justify-content:space-between;max-width:1100px;width:100%;margin:0 auto}
+.t-legend{display:flex;gap:12px;font:500 12px var(--fb);color:var(--t2)}
+.tl-chip{display:flex;align-items:center;gap:5px}
+.tl-chip i{width:10px;height:10px;border-radius:3px}
+.tl-sp i{background:var(--t1)}
+.tl-pre i{background:var(--c4)}
+.tl-sub i{background:var(--c1)}
+.tl-nm i{background:var(--c3)}
+.tl-wd i{background:var(--ac)}
+
+.tokens-flow{display:flex;flex-wrap:wrap;gap:6px;max-width:1100px;width:100%;margin:0 auto;max-height:160px;overflow:hidden}
+.tk-node{font:500 13px/1 var(--fm);padding:6px 9px;border-radius:8px;background:var(--s2);color:var(--t1);display:inline-flex;align-items:center;border:1px solid var(--ln);transition:transform .25s var(--e),opacity .25s var(--e),background-color .2s}
+.tk-node.sp{background:var(--t1);color:var(--bg);font-weight:600}
+.tk-node.pre{background:color-mix(in srgb,var(--c4) 22%,var(--s));color:var(--c4);border-color:color-mix(in srgb,var(--c4) 35%,transparent)}
+.tk-node.sub{background:color-mix(in srgb,var(--c1) 22%,var(--s));color:var(--c1);font-weight:600;border-color:color-mix(in srgb,var(--c1) 35%,transparent)}
+.tk-node.nm{background:color-mix(in srgb,var(--c3) 22%,var(--s));color:var(--c3);border-color:color-mix(in srgb,var(--c3) 35%,transparent)}
+.tk-node.wd{background:color-mix(in srgb,var(--ac) 15%,var(--s));color:var(--t1)}
+
+/* Aligned Token Bar & Vector Matrix */
+.aligned-tokens-bar{display:grid;grid-template-columns:repeat(12,1fr);gap:8px;max-width:1100px;width:100%;margin:0 auto}
+.at-cell{text-align:center;padding:4px 2px;font:600 12px var(--fm);background:var(--s2);border-radius:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border:1px solid var(--ln)}
+.at-cell.cls{background:var(--t1);color:var(--bg)}
+
+.emb-matrix{max-width:1100px;width:100%;margin:0 auto;display:flex;flex-direction:column;gap:6px}
+.emb-labels{display:flex;align-items:center;justify-content:center;gap:18px;padding:3px 0;border-bottom:1px solid var(--ln)}
+.emb-op{font:700 16px var(--fm);color:var(--t3)}
+.emb-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:8px}
+.emb-col{display:flex;flex-direction:column;gap:3px;align-items:center}
+.emb-tier{display:flex;gap:1.5px;background:var(--s2);padding:2px;border-radius:4px;width:100%}
+.emb-tier i{flex:1;height:11px;border-radius:2px;transition:opacity .2s var(--e)}
+.emb-caption{text-align:center;color:var(--t3);font-size:12px;margin-top:2px}
+
+/* Layer 3: Model Stack & Classifier Split */
+.model-stage-split{display:grid;grid-template-columns:1.25fr 1fr;gap:20px;width:100%;max-width:1280px;margin:0 auto;height:100%;align-items:center}
+.transformer-box{background:var(--s);border:1px solid var(--ln);border-radius:16px;padding:12px 16px;display:flex;flex-direction:column;gap:8px;box-shadow:0 8px 24px rgba(0,0,0,.05);min-height:0}
+.tf-meta{display:flex;align-items:center;justify-content:space-between}
+.tf-title{font:600 14px var(--fd);color:var(--t1)}
+.tf-subtitle{font-size:11px}
+.layer-pill{font:600 12px var(--fm);padding:3px 10px;border-radius:999px;background:var(--acs);color:var(--ac)}
+.svg-container{width:100%;flex:1;min-height:220px;max-height:300px;display:flex;align-items:center}
+#net-svg{width:100%;height:100%;overflow:visible}
+
+/* Classification Box */
+.classifier-box{background:var(--s);border:1px solid var(--ln);border-radius:16px;padding:14px 18px;display:flex;flex-direction:column;gap:10px;box-shadow:0 8px 24px rgba(0,0,0,.05)}
+.cls-header{display:flex;flex-direction:column;gap:3px}
+.cls-wire-badge{font:600 11px var(--fm);color:var(--c3);text-transform:uppercase;letter-spacing:.06em}
+.cls-headline{display:flex;justify-content:space-between;align-items:baseline}
+.cls-headline h4{font:600 16px var(--fd);margin:0}
+.role-bars-list{display:flex;flex-direction:column;gap:5px}
+.r-bar-item{display:grid;grid-template-columns:105px 1fr 52px;gap:10px;align-items:center;padding:5px 8px;border-radius:8px;background:color-mix(in srgb,var(--s2) 60%,transparent);transition:all .25s var(--e)}
+.r-bar-item.winner{background:color-mix(in srgb,var(--c3) 16%,var(--s));box-shadow:inset 0 0 0 1.5px var(--c3);font-weight:600}
+.r-label{display:flex;align-items:center;gap:8px;font:600 13px var(--fb)}
+.r-track{height:10px;border-radius:5px;background:var(--s2);overflow:hidden}
+.r-fill{display:block;height:100%;border-radius:5px;background:var(--c);transform-origin:left;transform:scaleX(0);transition:transform .35s var(--e)}
+.r-val{text-align:right;font:600 13px var(--fm)}
+
+.winner-card{padding:10px 12px;border-radius:10px;background:color-mix(in srgb,var(--c3) 14%,var(--s));border:1px solid color-mix(in srgb,var(--c3) 40%,transparent);display:flex;flex-direction:column;gap:5px;transition:opacity .3s var(--e),transform .3s var(--e)}
+.wc-header{display:flex;align-items:center;gap:8px}
+.wc-trophy{font-size:18px;color:var(--c3)}
+.wc-title-wrap{display:flex;flex-direction:column;line-height:1.2}
+.wc-label{font:600 10px var(--fm);color:var(--c3);letter-spacing:.06em;text-transform:uppercase}
+.wc-name{font:700 16px var(--fd);color:var(--t1)}
+.wc-correct-badge{margin-left:auto;font:600 11px var(--fm);background:var(--c2);color:#fff;padding:2px 8px;border-radius:999px}
+.wc-stats{font-size:11px;color:var(--t2);border-top:1px solid color-mix(in srgb,var(--c3) 25%,transparent);padding-top:5px}
+
+/* Stage Bottom Caption Bar */
+.cap{display:flex;gap:16px;align-items:center;justify-content:space-between;padding:12px 20px;border-top:1px solid var(--ln);background:color-mix(in srgb,var(--s2) 60%,var(--s))}
+.cap-main{display:flex;align-items:center;gap:14px;min-width:0}
+.cap-step-pill{font:600 12px var(--fm);color:#fff;background:var(--ac);padding:4px 10px;border-radius:999px;white-space:nowrap;flex:none}
+.cap h3{font:600 17px var(--fd);letter-spacing:-.01em;margin:0}
+.cap p{font-size:13.5px;line-height:1.4;color:var(--t2);margin:2px 0 0;max-width:76ch}
+.nb{display:flex;gap:8px;flex:none}
+.nb button{padding:7px 14px;border-radius:999px;font:600 13px var(--fb);background:var(--s);border:1px solid var(--ln);color:var(--t1);transition:all .15s var(--e);cursor:pointer}
+.nb button:hover:not(:disabled){background:var(--ac);color:#fff;border-color:var(--ac)}
+.nb button:disabled{opacity:.35;cursor:default}
+
+/* Responsive adjustments */
+@media (max-width:960px){
+.pin{padding:calc(var(--hh) + 6px) 10px 8px}
+.stg{max-height:calc(100svh - var(--hh) - 14px);border-radius:16px}
+.steps span{display:none}
+.steps button{justify-content:center;padding:6px 2px}
+.prep-checklist{grid-template-columns:1fr;gap:6px}
+.model-stage-split{grid-template-columns:1fr;gap:10px}
+.svg-container{min-height:170px;max-height:220px}
+.cap{flex-direction:column;align-items:stretch;gap:8px;padding:10px 14px}
+.cap-main{flex-direction:column;align-items:flex-start;gap:4px}
+.nb{justify-content:flex-end}
+.aligned-tokens-bar{grid-template-columns:repeat(6,1fr)}
+.emb-grid{grid-template-columns:repeat(6,1fr)}
+}
+
+/* results */
+.rwb{display:grid;grid-template-columns:260px 1fr 110px;gap:16px;align-items:center;min-height:48px;border-top:1px solid var(--ln);padding:0 24px}.rwb:first-child{border-top:0}
+.rwb.best{font-weight:700}.rwb .mt{height:10px}.rwb .mt i{background:var(--t3);transition:width .4s var(--e)}.rwb.best .mt i{background:var(--ac)}.rwb .v{text-align:right;font:500 13px var(--fm);color:var(--t1)}
+.exp{display:grid;grid-template-columns:210px 1fr;overflow:hidden}.exp aside{border-right:1px solid var(--ln);padding:16px;display:flex;flex-direction:column;gap:4px}
+.exp aside button{display:flex;gap:8px;align-items:center;height:40px;padding:0 12px;border-radius:10px;color:var(--t2);font-weight:600;transition:background-color .15s var(--e)}
+.exp aside button:hover{background:var(--s2)}
+.exp aside button[aria-pressed=true]{background:var(--s2);color:var(--t1);box-shadow:inset 0 0 0 1.5px var(--c)}.exp aside button .m{margin-left:auto}
+.xb{padding:24px;display:flex;flex-direction:column;gap:16px;min-width:0}.flow{display:flex;height:44px;gap:3px;border-radius:12px;overflow:hidden}
+.flow i{background:var(--c);min-width:4px;transition:flex-grow .4s var(--e)}
+.lg{display:grid;grid-template-columns:repeat(5,1fr);gap:8px 16px;font-size:14px;color:var(--t2)}.lg b{display:block;font:700 20px var(--fd);color:var(--t1)}
+.lg div{border-top:3px solid var(--c);padding-top:8px;min-width:0}
+.rec{padding:28px;display:flex;flex-direction:column;gap:12px}.rec h3{font:700 28px/1.2 var(--fd);letter-spacing:-.01em}
+.lim{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;color:var(--t2);font-size:15px;line-height:1.5}.lim b{display:block;font-weight:700;color:var(--t1);margin-bottom:4px}
+footer{margin-top:96px;border-top:1px solid var(--ln);padding:24px 0 8px;font:400 15px/1.7 var(--fb);color:var(--t2)}
+footer b{display:block;font-weight:700;color:var(--t1);font-size:16px}
+@keyframes up{from{opacity:0;transform:translateY(8px)}}
+#background>*{animation:up .5s var(--e) both}#background>*:nth-child(2){animation-delay:.05s}#background>*:nth-child(3){animation-delay:.1s}#background>*:nth-child(4){animation-delay:.15s}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}html{scroll-behavior:auto}}
+@media (max-width:1180px){.chip{display:none}}
+@media (max-width:900px){
+.hd{flex-wrap:wrap;gap:8px 12px;padding-block:8px}.nav{order:3;width:100%;overflow-x:auto;border-radius:999px}.brand{margin-right:auto}
+.spec,.exp{grid-template-columns:1fr}.ab{border-right:0;border-bottom:1px solid var(--ln);padding:16px}
+.grid3,.lim,.rqs{grid-template-columns:1fr}.grid3>div+div{border-top:1px solid var(--ln)}
+.rwb{grid-template-columns:1fr 100px;padding:0 16px}.rwb .mt{display:none}
+.exp aside{flex-direction:row;overflow-x:auto;border-right:0;border-bottom:1px solid var(--ln)}.exp aside button{white-space:nowrap}.exp aside button .m{display:none}
+.lg{grid-template-columns:1fr 1fr}.ls{grid-template-columns:72px 1fr;gap:0 12px}
+.steps span{display:none}.steps{padding-inline:8px}.steps button{justify-content:center;padding:6px 2px}
+.pn{padding:14px 16px}.chk{grid-template-columns:1fr}.or{grid-template-columns:110px 1fr 54px;gap:8px}
+.cap{padding:12px 16px}.cap p{font-size:14px}.cap h3{font-size:18px}
+.er,.eh{grid-template-columns:44px 1fr 10px 1fr 10px 1fr;gap:4px}.g i{height:14px}
+.sec{padding-top:72px}
+}
+
+/* refinement */
+.m{font:500 13px/1.45 var(--fb);color:var(--t3);font-variant-numeric:tabular-nums}
+.brand span,.chip{display:none}.brand b{font:600 20px var(--fd)}
+.nav{box-shadow:none}.prog i{background:var(--ac)}
+h1{font:600 clamp(38px,5.6vw,68px)/1.08 var(--fd);letter-spacing:-.02em;max-width:17ch}
+h2{font:600 clamp(28px,3.6vw,40px)/1.15 var(--fd);letter-spacing:-.015em;max-width:24ch}
+.sec{padding-top:120px;gap:28px}#background{padding-top:72px}
+p.lead{font:400 20px/1.62 var(--fd)}p.b{font:400 18px/1.68 var(--fd);max-width:62ch}
+.card{border-radius:14px}
+.pnl h3,.cap h3,.grid3 h3,.rec h3{font-family:var(--fd);font-weight:600}
+.pnl{font-size:15px}.grid3 p,.rqs p,.lim,.cap p{font-size:16px}
+.rqs b{font:600 14px var(--fb);color:var(--ac)}
+.ls .tx{font:400 17px/28px var(--fd)}.ls .mg{font:600 13px/28px var(--fb)}
+.ls code{font-size:12px}
+.w,.or .v,.rwb .v,.steps b,.eh b{font-family:var(--fb);font-variant-numeric:tabular-nums}
+.w{font-size:13px}.rwb .v{font-size:14px}
+.al{opacity:1;color:var(--t3)}.al.on{color:var(--t1)}.al span{font-family:var(--fd)}
+.sel{font:400 20px/1.45 var(--fd)}
+.mt i{transition:width .55s var(--e),background-color .35s}
+/* walkthrough refined */
+.flow{gap:0}.flow i{min-width:0;box-shadow:inset -3px 0 0 var(--s);transition:flex-grow .6s var(--e)}
+.grid3>div{gap:10px}
+</style>
+
+<header id="hd">
+ <div class="wrap hd">
+  <a class="brand" href="#background"><b>Sentence Roles</b></a>
+  <nav class="nav" id="nav" aria-label="Sections"></nav>
+    <button class="ib" id="theme" type="button" aria-label="Switch light and dark theme"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3v18" /><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor"/></svg></button>
+ </div>
+ <div class="prog"><i id="pg"></i></div>
+</header>
+
+<main class="wrap">
+<section class="sec" id="background" style="--c:var(--c0)">
+  <h1>Every sentence in a medical abstract has a job</h1>
+ <p class="lead">Our model reads one sentence at a time and names its role, using where the sentence sits in the abstract as a clue. Select a sentence to see what the model receives and how reliable it is at that spot in the abstract.</p>
+ <div class="card spec" id="spec">
+  <div class="ab"><div class="bar"><span class="m">Illustrative abstract, written for this page</span>
+   <div class="seg" id="mode"><button type="button" aria-pressed="true" data-m="r">Roles</button><button type="button" aria-pressed="false" data-m="p">Model input</button></div></div>
+   <div id="lines"></div></div>
+  <div class="pnl" id="pnl"></div>
+ </div>
+</section>
+
+<section class="sec" id="objective" style="--c:var(--c1)">
+  <h2>Does knowing where a sentence sits help a biomedical model</h2>
+ <p class="b">A text-only Bio ClinicalBERT scored 0.8143 macro-F1. A logistic regression given 14 position features scored 0.8295, 1.52 points higher. We ask how far a transformer goes when it is given the same clue, on PubMed 20k RCT with 30,135 held-out test sentences.</p>
+ <div class="rqs">
+  <div class="card"><b>RQ1</b><p>How accurately can classical ML (TF-IDF plus a classifier) label sentence roles?</p></div>
+  <div class="card"><b>RQ2</b><p>Do transformers significantly outperform the classical approaches?</p></div>
+  <div class="card"><b>RQ3</b><p>What does the accuracy gain cost in training time and inference speed?</p></div>
+ </div>
+</section>
+
+<section class="sec" id="how-it-works" style="--c:var(--ac)">
+ <div class="hiw-head">
+  <h2>From one sentence to one label</h2>
+  <p class="b">Scroll to watch a sentence continuously transform through the model pipeline. Each stage uses the exact output of the previous step to initiate the next.</p>
+ </div>
+ <div class="track" id="track">
+  <div class="pin" id="pin">
+   <div class="card stg" id="stg">
+    <!-- Top Step Bar & Progress -->
+    <div class="stg-head">
+     <ol class="steps" id="steps"></ol>
+     <div class="sbar"><i id="sf"></i></div>
+    </div>
+
+    <!-- Unified Continuous Stage Arena -->
+    <div class="stage-canvas" id="canvas">
+     <div class="scene-wrap" id="scene-wrap">
+
+      <!-- STAGE 0 & 1: Abstract Sentences collapsing into Hero Sentence + Preprocessing -->
+      <div class="layer-sec active" id="layer-text">
+       <div class="abs-stack" id="abs-stack"></div>
+       <div class="hero-card" id="hero-card">
+        <div class="hero-top">
+         <span class="stage-badge" id="hero-badge">Selected Sentence (Line 6 of 9)</span>
+         <span class="m">Test Sample &middot; PubMed 20k RCT</span>
+        </div>
+        <div class="hero-sentence-line" id="hero-sentence-line">
+         <span class="prefix-capsule" id="prefix-capsule">
+          <span class="p-chip p-line">[LINE 6 OF 9]</span>
+          <span class="p-chip p-pct">[PCT 67%]</span>
+         </span>
+         <span class="hero-text" id="hero-text">Mean adherence was 91% in the combination-pill group and 83% in the usual-care group</span>
+        </div>
+        <div class="prep-checklist" id="prep-checklist">
+         <div class="prep-item" id="chk-space"><span class="chk-icon">&check;</span><span>Extra spaces trimmed</span></div>
+         <div class="prep-item" id="chk-tokens"><span class="chk-icon">&check;</span><span>Clinical metrics preserved (91%, 83%, hyphens)</span></div>
+         <div class="prep-item" id="chk-prefix"><span class="chk-icon">&check;</span><span>Document position prefix attached</span></div>
+        </div>
+       </div>
+      </div>
+
+      <!-- STAGE 2 & 3: Token Chips fracture and sprout Embedding Columns -->
+      <div class="layer-sec" id="layer-tokens">
+       <div class="tokens-header">
+        <span class="m">WordPiece Tokenization (34 tokens generated &middot; PubMed vocabulary)</span>
+        <div class="t-legend">
+         <span class="tl-chip tl-sp"><i></i>Special</span>
+         <span class="tl-chip tl-pre"><i></i>Position Prefix</span>
+         <span class="tl-chip tl-sub"><i></i>Subword (##)</span>
+         <span class="tl-chip tl-nm"><i></i>Metric/Number</span>
+         <span class="tl-chip tl-wd"><i></i>Word</span>
+        </div>
+       </div>
+       <div class="tokens-flow" id="tokens-flow"></div>
+       <div class="aligned-tokens-bar" id="aligned-tokens-bar"></div>
+       <div class="emb-matrix" id="emb-matrix">
+        <div class="emb-labels">
+         <span class="m">Token Vector <small>e<sub>tok</sub> &isin; &reals;<sup>768</sup></small></span>
+         <span class="emb-op">+</span>
+         <span class="m">Position Vector <small>e<sub>pos</sub> &isin; &reals;<sup>768</sup></small></span>
+         <span class="emb-op">=</span>
+         <span class="m" style="color:var(--ac);font-weight:600">Model Input <small>e<sub>in</sub> &isin; &reals;<sup>768</sup></small></span>
+        </div>
+        <div class="emb-grid" id="emb-grid"></div>
+        <div class="emb-caption m">
+         <span>12 key tokens shown of 34 &middot; 8 sampled values per 768-d vector &middot; Teal is positive, amber is negative</span>
+        </div>
+       </div>
+      </div>
+
+      <!-- STAGE 4 & 5: Deep Transformer Stack + Output Wire + Softmax Classification -->
+      <div class="layer-sec" id="layer-model">
+       <div class="model-stage-split">
+        <!-- Left: 12-Layer Transformer Neural Stack (SVG) -->
+        <div class="transformer-box" id="transformer-box">
+         <div class="tf-meta">
+          <div>
+           <div class="tf-title">PubMedBERT Transformer Encoder</div>
+           <div class="tf-subtitle m">12 layers &middot; 12 attention heads &middot; 768 hidden dim &middot; 110M params</div>
+          </div>
+          <div class="layer-pill" id="layer-pill">Layer 1 of 12</div>
+         </div>
+         <div class="svg-container">
+          <svg id="net-svg" viewBox="0 0 680 340" preserveAspectRatio="xMidYMid meet" role="img" aria-label="12-layer Transformer attention architecture">
+           <defs>
+            <filter id="glow-gold" x="-40%" y="-40%" width="180%" height="180%">
+             <feGaussianBlur stdDeviation="5" result="blur"/>
+             <feMerge>
+              <feMergeNode in="blur"/>
+              <feMergeNode in="SourceGraphic"/>
+             </feMerge>
+            </filter>
+            <filter id="glow-teal" x="-40%" y="-40%" width="180%" height="180%">
+             <feGaussianBlur stdDeviation="4" result="blur"/>
+             <feMerge>
+              <feMergeNode in="blur"/>
+              <feMergeNode in="SourceGraphic"/>
+             </feMerge>
+            </filter>
+            <linearGradient id="wire-beam" x1="0%" y1="0%" x2="100%" y2="0%">
+             <stop offset="0%" stop-color="var(--c3)"/>
+             <stop offset="100%" stop-color="var(--ac)"/>
+            </linearGradient>
+           </defs>
+           <g id="svg-attention-lines"></g>
+           <g id="svg-nodes"></g>
+           <g id="svg-output-wire"></g>
+          </svg>
+         </div>
+        </div>
+
+        <!-- Right: Classification Head & Softmax Prediction -->
+        <div class="classifier-box" id="classifier-box">
+         <div class="cls-header">
+          <span class="cls-wire-badge" id="cls-wire-badge">Signal Connected via [CLS] Output Wire</span>
+          <div class="cls-headline">
+           <h4>Classification Head</h4>
+           <span class="m">W<sub>768&times;5</sub> &middot; h<sub>[CLS]</sub> + b &rarr; Softmax</span>
+          </div>
+         </div>
+         <div class="role-bars-list" id="role-bars-list"></div>
+         <div class="winner-card" id="winner-card">
+          <div class="wc-header">
+           <span class="wc-trophy">&starf;</span>
+           <div class="wc-title-wrap">
+            <span class="wc-label">PREDICTED ROLE</span>
+            <b class="wc-name" id="wc-name">RESULTS (91.2%)</b>
+           </div>
+           <span class="wc-correct-badge">&check; Correct</span>
+          </div>
+          <div class="wc-stats m">
+           <span>True Role: <b>RESULTS</b></span> &middot;
+           <span>Recall: <b>92.8%</b></span> &middot;
+           <span>Position d6 Accuracy: <b>96.2%</b></span>
+          </div>
+         </div>
+        </div>
+       </div>
+      </div>
+
+     </div>
+    </div>
+
+    <!-- Bottom Caption & Step Stepper -->
+    <div class="cap">
+     <div class="cap-main">
+      <div class="cap-step-pill" id="cap-step-pill">Step 1 of 6</div>
+      <div>
+       <h3 id="ct"></h3>
+       <p id="cd"></p>
+      </div>
+     </div>
+     <div class="nb">
+      <button type="button" id="prev" aria-label="Previous step">&larr; Previous</button>
+      <button type="button" id="next" aria-label="Next step">Next &rarr;</button>
+     </div>
+    </div>
+   </div>
+  </div>
+ </div>
+</section>
+
+<section class="sec" id="methods" style="--c:var(--c2)">
+  <h2>Three changes to the transformer</h2>
+ <div class="grid3 card">
+  <div><h3>PubMedBERT backbone</h3><p>Pretrained from scratch on 14M PubMed abstracts, replacing Bio ClinicalBERT, which continues from clinical notes.</p></div>
+  <div style="border-left:1px solid var(--ln)"><h3>Position prefix</h3><p>Line number, abstract length and relative position are written in front of every sentence before tokenising.</p><code>[LINE i OF N] [PCT n%]</code></div>
+  <div style="border-left:1px solid var(--ln)"><h3>Class-weighted loss</h3><p>Inverse class frequency, so rare roles count for more.</p><div id="wts" style="display:flex;flex-direction:column;gap:4px"></div></div>
+ </div>
+ <p class="m">5 epochs, batch 32, max length 128, learning rate 2e-5, Colab T4, seed 42. The epoch-2 checkpoint was kept (dev macro-F1 0.8726)</p>
+</section>
+
+<section class="sec" id="results" style="--c:var(--c3)">
+  <h2>PubMedBERT with position reaches 0.8705 macro-F1</h2>
+ <div class="seg" id="mt" style="align-self:flex-start"></div>
+ <div class="card" id="board"></div>
+ <h2 style="font-size:28px;margin-top:24px">Where the remaining 2,582 errors go</h2>
+ <p class="b">Choose a true role to see how its sentences were labelled.</p>
+ <div class="card exp"><aside id="roles"></aside><div class="xb" id="xb"></div></div>
+</section>
+
+<section class="sec" id="conclusions" style="--c:var(--c4)">
+  <h2>Pick the model for the machine you have</h2>
+ <div class="seg" id="hw" style="align-self:flex-start"><button type="button" aria-pressed="true" data-h="g">GPU available</button><button type="button" aria-pressed="false" data-h="c">CPU only</button></div>
+ <div class="card rec" id="rec"></div>
+ <div class="lim"><div><b>One seed</b>Backbone, prefix and weights changed together in a single run, so each effect is not isolated.</div>
+ <div><b>Descriptive results</b>The gap to logistic regression compares configurations, not a tested explanation.</div>
+ <div><b>Sentence by sentence</b>Neighbouring sentences are not used yet. A BiLSTM-CRF or cross-sentence transformer is the next test.</div></div>
+</section>
+<footer><b>Azan Wasty, Nauman Iqbal, Afras Shahnawaz &middot; Instructor Hajra Waheed</b>AI2002 Artificial Intelligence, Track A, Research and Development</footer>
+</main>
+
+<script>
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const R=['Background','Objective','Methods','Results','Conclusions'],fm=v=>v.toLocaleString('en-US');
+const clamp=(x,a=0,b=1)=>Math.min(b,Math.max(a,x)),sm=(x,a,b)=>{const t=clamp((x-a)/(b-a));return t*t*(3-2*t)};
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const A=[.7850,.8454,.9035,.9326,.9583,.9713,.9615,.9318,.9393,.9808],RC=[.8238,.6695,.9700,.9277,.9619],SU=[3621,2333,9897,9713,4571];
+const K=[[2983,543,76,8,11],[709,1562,56,6,0],[77,51,9600,160,9],[5,2,428,9011,267],[36,0,15,123,4397]];
+const F3=[[.701,.752,.726],[.699,.614,.654],[.927,.950,.938],[.917,.923,.920],[.863,.807,.834]],F4=[[.7829,.8238,.8029],[.7238,.6695,.6956],[.9435,.9700,.9566],[.9681,.9277,.9475],[.9387,.9619,.9502]];
+const hdr=$('#hd'),hh=()=>hdr.offsetHeight;
+function setHH(){document.documentElement.style.setProperty('--hh',hdr.offsetHeight+'px')}
+/* menu */
+const SEC=[['background','Background','var(--c0)'],['objective','Objective','var(--c1)'],['how-it-works','How it works','var(--ac)'],['methods','Methods','var(--c2)'],['results','Results','var(--c3)'],['conclusions','Conclusions','var(--c4)']];
+const nav=$('#nav');
+nav.innerHTML='<span class="ind" id="ind"></span>'+SEC.map(([id,l,c])=>`<a href="#${id}" data-id="${id}" style="--c:${c}"><span>${l}</span></a>`).join('');
+let curId='';
+function setActive(id,force){
+ if(id===curId&&!force)return;curId=id;
+ const a=nav.querySelector(`[data-id="${id}"]`),ind=$('#ind');
+ nav.querySelectorAll('a').forEach(x=>x.setAttribute('aria-current',x===a));
+ ind.style.width=a.offsetWidth+'px';ind.style.transform=`translateX(${a.offsetLeft}px)`;ind.style.setProperty('--c',a.style.getPropertyValue('--c'));
+ if(nav.scrollWidth>nav.clientWidth)nav.scrollTo({left:a.offsetLeft-24,behavior:reduce?'auto':'smooth'});
+}
+function activeId(){const y=hh()+90;let c=SEC[0][0];for(const [id] of SEC){if($('#'+id).getBoundingClientRect().top<=y)c=id}return c}
+/* theme */
+const root=document.documentElement;
+$('#theme').addEventListener('click',()=>{const dark=root.dataset.theme?root.dataset.theme==='dark':matchMedia('(prefers-color-scheme: dark)').matches;root.dataset.theme=dark?'light':'dark'});
+/* weights */
+$('#wts').innerHTML=[1.6573,2.6019,.6067,.6213,1.3254].map((v,i)=>`<div class="w"><span>${R[i]}</span><div class="mt" style="--c:var(--c${i})"><i style="width:${v/2.7*100}%"></i></div><span class="n">${v.toFixed(2)}</span></div>`).join('');
+/* specimen */
+const S=[[0,'Hypertension in older adults is often managed with several drugs taken at different times of day'],[0,'Whether a single daily combination pill improves adherence remains uncertain'],[1,'We aimed to compare adherence to a once-daily combination pill with usual multi-pill therapy'],[2,'This was a 12-month randomised, open-label trial in four outpatient clinics'],[2,'Adults aged 60 or older with treated hypertension were assigned 1:1 to either regimen'],[2,'Adherence was the share of prescribed doses taken, counted with electronic pill caps'],[3,'Mean adherence was 91% in the combination-pill group and 83% in the usual-care group'],[3,'Systolic blood pressure fell by a similar amount in both groups'],[4,'A single combination pill improved adherence without worsening blood pressure control']];
+const N=S.length;let sel=2,pm=false;
+const pre=i=>`[LINE ${i} OF ${N}] [PCT ${Math.round(100*i/N)}%]`;
+const spL=$('#lines'),spP=$('#pnl');
+spL.innerHTML=S.map((s,i)=>{const f=!(i&&S[i-1][0]===s[0]);return `<button type="button" class="ls ${f?'f':''}" style="--c:var(--c${s[0]})" data-i="${i}"><span class="mg">${f?R[s[0]]:''}</span><span><span class="tx">${s[1]}</span><code>${pre(i)}</code></span></button>`}).join('');
+spP.innerHTML=`<h3>What the model receives</h3><code id="spc"></code>
+<div><div class="kv"><span id="spa"></span><b class="n" id="spav"></b></div><div class="mt"><i id="spm"></i></div><div class="strip" aria-hidden="true">${A.map(v=>`<i style="height:${(v-.7)/.3*100}%"></i>`).join('')}</div></div>
+<div><div class="kv"><span id="spr"></span><b class="n" id="sprv"></b></div><div class="mt"><i id="sprm"></i></div></div><p class="m" id="spn"></p>`;
+const strips=$$('#pnl .strip i');
+function drawSpec(){
+ spL.className=pm?'pm':'';$$('#lines .ls').forEach((b,i)=>b.setAttribute('aria-pressed',i===sel));
+ const [r,t]=S[sel],d=Math.floor(sel/N*10),row=K[r],mx=row.map((v,j)=>j===r?-1:v),j=mx.indexOf(Math.max(...mx));
+ spP.style.setProperty('--c',`var(--c${r})`);$('#spc').textContent=`${pre(sel)} ${t}`;
+ $('#spa').textContent=`Accuracy at position d${d}`;$('#spav').textContent=(A[d]*100).toFixed(1)+'%';$('#spm').style.width=A[d]*100+'%';
+ strips.forEach((e,k)=>e.classList.toggle('on',k===d));
+ $('#spr').textContent=`${R[r]} recall`;$('#sprv').textContent=(RC[r]*100).toFixed(1)+'%';$('#sprm').style.width=RC[r]*100+'%';
+ $('#spn').textContent=`Most often mistaken for ${R[j]}: ${fm(row[j])} of ${fm(SU[r])} ${R[r].toLowerCase()} sentences in the test set`}
+spL.addEventListener('click',e=>{const b=e.target.closest('.ls');if(b){sel=+b.dataset.i;drawSpec()}});
+$('#mode').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;pm=b.dataset.m==='p';[...$('#mode').children].forEach(x=>x.setAttribute('aria-pressed',x===b));drawSpec()});
+drawSpec();
+/* walkthrough */
+const ST=[
+['Pick a sentence','The abstract is split into sentences and the model labels one at a time. Here it reads line 6 of 9.'],
+['Preprocess & Prefix','Extra spaces are trimmed, medical numbers & hyphens stay, and document position coordinates [LINE 6 OF 9] [PCT 67%] attach to the front.'],
+['Tokenise to Chips','The preprocessed text fractures into WordPiece tokens. Rare words split (e.g. adhere + ##nce). Special [CLS] and [SEP] anchor the ends.'],
+['Embed Vectors','Each token chip sprouts into a 768-dimensional vector, fusing semantic word identity with positional sequence order.'],
+['12-Layer Transformer','Contextual self-attention: tokens look at all other tokens across 12 layers. All sentence information pools upward into the top [CLS] node.'],
+['Classify & Predict','The final [CLS] representation projects through a linear layer and Softmax into 5 role probabilities. RESULTS wins with 91.2% confidence!']
+];
+const SENT=S[6][1],SELI=6;
+$('#steps').innerHTML=ST.map((s,i)=>`<li><button type="button" data-s="${i}" title="${s[0]}"><b>${i+1}</b><span>${s[0]}</span></button></li>`).join('');
+const stepBtns=$$('#steps button');
+
+/* Setup Layer Elements */
+const layerText=$('#layer-text'),layerTokens=$('#layer-tokens'),layerModel=$('#layer-model');
+
+/* 1. Abstract stack setup */
+const absStack=$('#abs-stack');
+absStack.innerHTML=S.map((s,i)=>`<div class="abs-row ${i===SELI?'hero':''}" data-i="${i}"><b>${i}</b><span>${s[1]}</span></div>`).join('');
+const absRows=$$('#abs-stack .abs-row');
+
+/* 2. Preprocessing setup */
+const heroCard=$('#hero-card'),prefixCapsule=$('#prefix-capsule'),heroText=$('#hero-text');
+const chkSpace=$('#chk-space'),chkTokens=$('#chk-tokens'),chkPrefix=$('#chk-prefix');
+
+/* 3. Tokens setup */
+const RAW_TOKENS=[
+['[CLS]','sp'],
+['[','pre'],['line','pre'],['6','pre'],['of','pre'],['9','pre'],[']','pre'],
+['[','pre'],['pct','pre'],['67','pre'],['%','pre'],[']','pre'],
+['mean','wd'],['adhere','wd'],['##nce','sub'],['was','wd'],['91','nm'],['%','nm'],
+['in','wd'],['the','wd'],['combination','wd'],['-','wd'],['pill','wd'],['group','wd'],
+['and','wd'],['83','nm'],['%','nm'],['in','wd'],['the','wd'],['usual','wd'],['-','wd'],['care','wd'],['group','wd'],
+['[SEP]','sp']
+];
+const tokensFlow=$('#tokens-flow');
+tokensFlow.innerHTML=RAW_TOKENS.map(([t,c])=>`<span class="tk-node ${c}">${t}</span>`).join('');
+const tkNodes=$$('#tokens-flow .tk-node');
+
+/* 4. Aligned Tokens & Embeddings setup */
+const ALIGNED_12=[
+['[CLS]','cls'],['line','pre'],['pct','pre'],['mean','wd'],['adhere','wd'],
+['##nce','sub'],['was','wd'],['91','nm'],['%','nm'],['pill','wd'],['group','wd'],['[SEP]','cls']
+];
+const alignedBar=$('#aligned-tokens-bar'),embMatrix=$('#emb-matrix');
+alignedBar.innerHTML=ALIGNED_12.map(([t,c])=>`<div class="at-cell ${c}">${t}</div>`).join('');
+
+function rr(a,b,c){const x=Math.sin(a*127.1+b*311.7+c*74.7)*43758.5453;return x-Math.floor(x)}
+const embCol=v=>v>=0?`rgba(11,107,99,${(.18+.82*v).toFixed(2)})`:`rgba(217,131,15,${(.18-.82*v).toFixed(2)})`;
+const cv=(g,i,k)=>{const a=rr(i,k,1)*2-1,b=rr(i,k,2)*2-1;return g===0?a:g===1?b:clamp(a+b,-1,1)};
+
+const embGrid=$('#emb-grid');
+embGrid.innerHTML=ALIGNED_12.map((_,i)=>`
+<div class="emb-col" data-col="${i}">
+  <div class="emb-tier" data-tier="0">${Array.from({length:8},(_,k)=>`<i style="background:${embCol(cv(0,i,k))}"></i>`).join('')}</div>
+  <div class="emb-tier" data-tier="1">${Array.from({length:8},(_,k)=>`<i style="background:${embCol(cv(1,i,k))}"></i>`).join('')}</div>
+  <div class="emb-tier" data-tier="2">${Array.from({length:8},(_,k)=>`<i style="background:${embCol(cv(2,i,k))}"></i>`).join('')}</div>
+</div>`).join('');
+const embTiers=$$('#emb-grid .emb-tier');
+
+/* 5. SVG Neural Network setup */
+const NS='http://www.w3.org/2000/svg';
+const netSvg=$('#net-svg'),svgLines=$('#svg-attention-lines'),svgNodes=$('#svg-nodes'),svgWire=$('#svg-output-wire');
+const N_COLS=12,N_LAYERS=6;
+const X0=48,DX=(680-96)/(N_COLS-1),Y_BOT=305,DY=(Y_BOT-35)/(N_LAYERS-1);
+const nodePos=(r,c)=>({x:X0+c*DX,y:Y_BOT-r*DY});
+
+const netNodes=[],netLines=[];
+// Generate attention lines
+for(let r=1;r<N_LAYERS;r++){
+  for(let c=0;c<N_COLS;c++){
+    const dst=nodePos(r,c);
+    const srcs=[];
+    if(c===0){
+      // [CLS] pools attention from representative tokens
+      [1,3,4,5,7,8,9,11].forEach(sc=>srcs.push([sc,0.4+0.55*rr(r,c,sc)]));
+    } else {
+      // Tokens attend to [CLS] and local neighbors
+      srcs.push([0,0.25+0.15*r]);
+      if(c>1)srcs.push([c-1,0.3+0.3*rr(r,c,c-1)]);
+      if(c<N_COLS-1)srcs.push([c+1,0.3+0.3*rr(r,c,c+1)]);
+      const far=1+Math.floor(rr(r,c,17)*(N_COLS-2));
+      srcs.push([far,0.2+0.3*rr(r,c,far+30)]);
+    }
+    srcs.forEach(([sc,w])=>{
+      const src=nodePos(r-1,sc);
+      const l=document.createElementNS(NS,'path');
+      const mx=(src.x+dst.x)/2,my=(src.y+dst.y)/2 - (r%2===0?6:-6);
+      l.setAttribute('d',`M ${src.x.toFixed(1)} ${src.y.toFixed(1)} Q ${mx.toFixed(1)} ${my.toFixed(1)} ${dst.x.toFixed(1)} ${dst.y.toFixed(1)}`);
+      l.setAttribute('fill','none');
+      l.setAttribute('stroke',c===0?'var(--c3)':'var(--ac)');
+      l.setAttribute('stroke-width',c===0?(1.2+2*w).toFixed(2):(0.8+1.6*w).toFixed(2));
+      l.setAttribute('stroke-linecap','round');
+      l.setAttribute('stroke-opacity','0');
+      l.dataset.r=r;
+      l.dataset.w=w;
+      l.dataset.cls=c===0?'1':'0';
+      svgLines.appendChild(l);
+      netLines.push(l);
+    });
+  }
+}
+
+// Generate nodes
+for(let r=0;r<N_LAYERS;r++){
+  for(let c=0;c<N_COLS;c++){
+    const pt=nodePos(r,c);
+    const isCls=c===0;
+    const g=document.createElementNS(NS,'g');
+    const circle=document.createElementNS(NS,'circle');
+    circle.setAttribute('cx',pt.x.toFixed(1));
+    circle.setAttribute('cy',pt.y.toFixed(1));
+    circle.setAttribute('r',isCls?(r===N_LAYERS-1?10:8):5);
+    circle.setAttribute('fill',isCls?'var(--c3)':'var(--ac)');
+    circle.setAttribute('stroke',isCls?'var(--c3)':'var(--ac)');
+    circle.setAttribute('stroke-width',isCls?'2.5':'1.5');
+    circle.setAttribute('fill-opacity',r===0?'0.9':'0.15');
+    circle.setAttribute('stroke-opacity',r===0?'0.9':'0.3');
+    if(isCls&&r===N_LAYERS-1){
+      circle.setAttribute('filter','url(#glow-gold)');
+      circle.id='top-cls-node';
+    }
+    g.appendChild(circle);
+    svgNodes.appendChild(g);
+    netNodes.push({el:circle,r,c,isCls});
+  }
+}
+
+// Generate Output Wire from Top [CLS] Node to Classifier panel
+const topClsPt=nodePos(N_LAYERS-1,0);
+const wirePath=document.createElementNS(NS,'path');
+wirePath.setAttribute('d',`M ${topClsPt.x} ${topClsPt.y} C ${topClsPt.x + 80} ${topClsPt.y - 30}, ${680 - 60} ${topClsPt.y - 20}, 680 ${topClsPt.y + 10}`);
+wirePath.setAttribute('fill','none');
+wirePath.setAttribute('stroke','url(#wire-beam)');
+wirePath.setAttribute('stroke-width','3.5');
+wirePath.setAttribute('stroke-linecap','round');
+wirePath.setAttribute('stroke-dasharray','8 4');
+wirePath.setAttribute('stroke-opacity','0');
+wirePath.id='output-wire-path';
+svgWire.appendChild(wirePath);
+
+/* 6. Classification Head setup */
+const roleBarsList=$('#role-bars-list');
+roleBarsList.innerHTML=R.map((r,i)=>`
+<div class="r-bar-item" style="--c:var(--c${i})" data-role="${i}">
+  <span class="r-label"><i class="d"></i>${r}</span>
+  <div class="r-track"><span class="r-fill"></span></div>
+  <span class="r-val n">0.0%</span>
+</div>`).join('');
+const rBarItems=$$('#role-bars-list .r-bar-item');
+const rFills=$$('#role-bars-list .r-fill');
+const rVals=$$('#role-bars-list .r-val');
+const winnerCard=$('#winner-card');
+
+// Final Softmax percentages: Results is 91.2%
+const FINAL_PROBS=[1.1, 0.5, 6.8, 91.2, 0.4];
+
+/* Walkthrough Scene Interpolator */
+const track=$('#track'),pin=$('#pin');
+let curS=-1,pT=0,pS=0,wr=0;
+
+function walk(){
+  const r=track.getBoundingClientRect(),tot=Math.max(1,r.height-pin.offsetHeight);
+  pT=clamp(-r.top/tot);
+  if(reduce)pS=pT;
+  if(!wr)wr=requestAnimationFrame(glide);
+}
+
+function glide(){
+  wr=0;
+  pS+=(pT-pS)*0.16;
+  if(Math.abs(pT-pS)<0.0004)pS=pT;
+  draw(pS);
+  if(pS!==pT)wr=requestAnimationFrame(glide);
+}
+
+function draw(p){
+  // p is 0..1. Map to continuous stage s from 0.0 to 5.0
+  const s=clamp(p*5.0, 0, 5.0);
+  const stepIdx=Math.min(5, Math.floor(s));
+
+  // Update step navigation indicators
+  if(stepIdx!==curS){
+    curS=stepIdx;
+    stepBtns.forEach((b,i)=>{
+      b.classList.toggle('done', i<curS);
+      if(i===curS)b.setAttribute('aria-current','step');
+      else b.removeAttribute('aria-current');
+    });
+    $('#ct').textContent=ST[curS][0];
+    $('#cd').textContent=ST[curS][1];
+    $('#cap-step-pill').textContent=`Step ${curS+1} of 6`;
+    $('#prev').disabled=curS===0;
+    $('#next').disabled=curS===5;
+  }
+  $('#sf').style.transform=`scaleX(${p})`;
+
+  // === LAYER 1: TEXT (Abstract Collapse & Preprocessing, s in 0..1.8) ===
+  const textActive = s <= 1.8;
+  layerText.classList.toggle('active', textActive);
+  if(s <= 1.8){
+    layerText.style.opacity = s < 1.4 ? '1' : String(clamp((1.8 - s) / 0.4));
+    layerText.style.transform = `translateY(${(s - 1.0) * -16}px)`;
+    
+    // Abstract Collapse: rows shrink away as s goes 0..0.7
+    const collapseT = clamp(s / 0.7);
+    absRows.forEach((r, i) => {
+      if(i !== SELI){
+        r.classList.toggle('collapse', collapseT > 0.15);
+        r.style.opacity = String(1 - collapseT);
+      }
+    });
+
+    // In step 0, show absStack and hide heroCard. At s > 0.5, fade in heroCard!
+    if(s < 0.6){
+      absStack.style.display = 'flex';
+      absStack.style.opacity = '1';
+      heroCard.style.opacity = String(clamp((s - 0.2) / 0.4));
+      heroCard.style.transform = `translateY(${(1 - clamp((s - 0.2) / 0.4)) * 16}px)`;
+    } else {
+      absStack.style.display = 'none';
+      heroCard.style.opacity = '1';
+      heroCard.style.transform = 'none';
+    }
+
+    // Preprocessing & Prefix: s in 0.7..1.5
+    const prepT = clamp((s - 0.7) / 0.7);
+    prefixCapsule.style.opacity = sm(prepT, 0.2, 0.7);
+    prefixCapsule.style.transform = `translateX(${(1 - sm(prepT, 0.2, 0.7)) * -24}px)`;
+
+    chkSpace.classList.toggle('active', prepT > 0.25);
+    chkTokens.classList.toggle('active', prepT > 0.55);
+    chkPrefix.classList.toggle('active', prepT > 0.85);
+  } else {
+    layerText.style.opacity = '0';
+  }
+
+  // === LAYER 2: TOKENS & EMBEDDINGS (s in 1.6..3.6) ===
+  const tokensActive = s >= 1.5 && s <= 3.7;
+  layerTokens.classList.toggle('active', tokensActive);
+  if(tokensActive){
+    const tokEnter = clamp((s - 1.5) / 0.4);
+    const tokExit = s > 3.3 ? clamp((3.7 - s) / 0.4) : 1;
+    layerTokens.style.opacity = String(Math.min(tokEnter, tokExit));
+    layerTokens.style.transform = `translateY(${(s - 2.5) * -12}px)`;
+
+    // Step 2: Token flow chips reveal (s in 1.8..2.7)
+    if(s < 2.8){
+      tokensFlow.style.display = 'flex';
+      alignedBar.style.display = 'none';
+      embMatrix.style.display = 'none';
+      const revealCount = Math.ceil(clamp((s - 1.7) / 0.9) * RAW_TOKENS.length);
+      tkNodes.forEach((node, i)=>{
+        const on = i < revealCount;
+        node.style.opacity = on ? '1' : '0.15';
+        node.style.transform = on ? 'none' : 'scale(0.85) translateY(4px)';
+      });
+    } else {
+      // Step 3: Aligned chips & Embeddings matrix (s in 2.8..3.7)
+      tokensFlow.style.display = 'none';
+      alignedBar.style.display = 'grid';
+      embMatrix.style.display = 'flex';
+      
+      const embT = clamp((s - 2.8) / 0.7);
+      embTiers.forEach(tier=>{
+        const tierIdx = +tier.dataset.tier;
+        const thresh = tierIdx * 0.3;
+        tier.querySelectorAll('i').forEach((cell, k)=>{
+          const cellT = thresh + k * 0.03;
+          cell.style.opacity = sm(embT, cellT, cellT + 0.15);
+        });
+      });
+    }
+  } else {
+    layerTokens.style.opacity = '0';
+  }
+
+  // === LAYER 3: MODEL STACK & CLASSIFICATION (s in 3.4..5.0) ===
+  const modelActive = s >= 3.4;
+  layerModel.classList.toggle('active', modelActive);
+  if(modelActive){
+    const modelEnter = clamp((s - 3.4) / 0.4);
+    layerModel.style.opacity = String(modelEnter);
+    layerModel.style.transform = `translateY(${(5.0 - s) * 8}px)`;
+
+    // Step 4: Upward activation wave through Transformer (s in 3.6..4.7)
+    const waveProgress = clamp((s - 3.6) / 1.0);
+    const activeLayers = Math.max(1, Math.min(12, Math.round(waveProgress * 11 + 1)));
+    $('#layer-pill').textContent = `Layer ${activeLayers} of 12`;
+
+    const layerFrac = waveProgress * (N_LAYERS - 1);
+    netLines.forEach(line=>{
+      const r = +line.dataset.r;
+      const w = +line.dataset.w;
+      const isCls = line.dataset.cls === '1';
+      const lineAlpha = clamp(layerFrac - (r - 1.2));
+      line.setAttribute('stroke-opacity', (lineAlpha * (isCls ? 0.9 : 0.65) * w).toFixed(3));
+    });
+
+    netNodes.forEach(({el, r, isCls})=>{
+      const nodeAlpha = r === 0 ? 1 : clamp(layerFrac - (r - 1.1));
+      el.setAttribute('fill-opacity', r === 0 ? '0.9' : (0.15 + 0.85 * nodeAlpha).toFixed(3));
+      el.setAttribute('stroke-opacity', r === 0 ? '0.9' : (0.3 + 0.7 * nodeAlpha).toFixed(3));
+    });
+
+    // Step 5: Output Wire & Softmax Classification (s in 4.5..5.0)
+    const wireT = clamp((s - 4.45) / 0.35);
+    wirePath.setAttribute('stroke-opacity', (wireT * 0.95).toFixed(2));
+    wirePath.setAttribute('stroke-dashoffset', String((1 - wireT) * 120));
+
+    const clsT = clamp((s - 4.55) / 0.42);
+    rBarItems.forEach((item, i)=>{
+      const targetProb = FINAL_PROBS[i];
+      const currentProb = clsT * targetProb;
+      rFills[i].style.transform = `scaleX(${(currentProb / 100).toFixed(3)})`;
+      rVals[i].textContent = clsT > 0.1 ? currentProb.toFixed(1) + '%' : '0.0%';
+      item.classList.toggle('winner', i === 3 && clsT > 0.85);
+    });
+
+    winnerCard.style.opacity = sm(clsT, 0.75, 1.0);
+    winnerCard.style.transform = clsT > 0.75 ? 'none' : 'translateY(8px)';
+  } else {
+    layerModel.style.opacity = '0';
+  }
+}
+
+function goStep(targetS){
+  targetS = clamp(targetS, 0, 5);
+  const r = track.getBoundingClientRect(), tot = r.height - pin.offsetHeight;
+  const targetP = (targetS + 0.5) / 5.0;
+  const y = scrollY + r.top + targetP * tot;
+  scrollTo({top: y, behavior: reduce ? 'auto' : 'smooth'});
+}
+
+$('#steps').addEventListener('click', e => {
+  const b = e.target.closest('button');
+  if(b) goStep(+b.dataset.s);
+});
+$('#prev').addEventListener('click', () => goStep(curS - 1));
+$('#next').addEventListener('click', () => goStep(curS + 1));
+
+/* board */
+const M=[['PubMedBERT + position + weights',.8705,.9143,.8850,4998.9,1.723],['LogReg + position',.8295,.8792,.8378,11.7,.073],['Bio ClinicalBERT',.8143,.8698,.8247,4999.7,1.656],['LogReg, text only',.7630,.8236,.7630,9.3,.073],['XGBoost, text only',.7305,.7862,.7149,78.6,.045],['Random Forest, text only',.7135,.7722,.6946,159.8,.067]];
+const MT=[['Macro-F1',1,1],['Accuracy',2,1],['Kappa',3,1],['Train time',4,0],['Inference',5,0]];let mi=0;
+$('#mt').innerHTML=MT.map((m,i)=>`<button type="button" data-i="${i}" aria-pressed="${i===0}">${m[0]}</button>`).join('');
+const bd=$('#board');
+bd.innerHTML=M.map(m=>`<div class="rwb"><span>${m[0]}</span><div class="mt"><i></i></div><span class="v n"></span></div>`).join('')+`<div class="rwb"><span class="m" id="bn" style="grid-column:1/-1"></span></div>`;
+const brs=$$('#board .rwb');
+function drawBoard(){const [,k,h]=MT[mi],vs=M.map(m=>m[k]),best=h?Math.max(...vs):Math.min(...vs),lo=Math.min(...vs),mxv=Math.max(...vs);
+ const w=v=>h?v*100:(Math.log10(v/lo)+.25)/(Math.log10(mxv/lo)+.25)*100;
+ M.forEach((m,i)=>{const r=brs[i];r.classList.toggle('best',m[k]===best);r.querySelector('.mt i').style.width=w(m[k])+'%';r.querySelector('.v').textContent=h?m[k].toFixed(4):k===4?fm(m[k])+' s':m[k].toFixed(3)+' s/1k'});
+ $('#bn').textContent=(h?'Higher is better':'Lower is better, bars on a log scale')+', 30,135 test sentences'}
+$('#mt').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;mi=+b.dataset.i;[...$('#mt').children].forEach(x=>x.setAttribute('aria-pressed',x===b));drawBoard()});drawBoard();
+/* explorer */
+let ri=1;
+$('#roles').innerHTML=R.map((r,i)=>`<button type="button" data-i="${i}" style="--c:var(--c${i})" aria-pressed="${i===ri}"><i class="d"></i>${r}<span class="m n">${fm(SU[i])}</span></button>`).join('');
+$('#xb').innerHTML=`<div class="kv"><span id="xh"></span></div><div class="flow">${R.map((_,j)=>`<i style="--c:var(--c${j})"></i>`).join('')}</div><div class="lg">${R.map((r,j)=>`<div style="--c:var(--c${j})"><b class="n"></b>${r}<br><span class="m n"></span></div>`).join('')}</div><p class="b" id="xp" style="max-width:none"></p>`;
+function drawX(){const row=K[ri],f3=F3[ri][2],f4=F4[ri][2];
+ [...$('#roles').children].forEach((b,i)=>b.setAttribute('aria-pressed',i===ri));
+ $('#xh').textContent=`${fm(SU[ri])} true ${R[ri].toLowerCase()} sentences, labelled as`;
+ $$('#xb .flow i').forEach((e,j)=>{e.style.flexGrow=row[j];e.title=`${R[j]}: ${fm(row[j])}`});
+ $$('#xb .lg>div').forEach((e,j)=>{e.querySelector('b').textContent=fm(row[j]);e.querySelector('.m').textContent=(row[j]/SU[ri]*100).toFixed(1)+'%'});
+ $('#xp').innerHTML=`F1 for ${R[ri].toLowerCase()}: Bio ClinicalBERT <span class="n">${f3.toFixed(3)}</span> to PubMedBERT <span class="n">${f4.toFixed(3)}</span> (${f4>f3?'+':''}${((f4-f3)*100).toFixed(1)} pts). Precision ${F4[ri][0].toFixed(3)}, recall ${F4[ri][1].toFixed(3)}`}
+$('#roles').addEventListener('click',e=>{const b=e.target.closest('button');if(b){ri=+b.dataset.i;drawX()}});drawX();
+/* recommendation */
+function drawRec(g){$('#rec').innerHTML=g?`<span class="m">Accuracy first</span><h3>PubMedBERT + position + class weights</h3><p class="b">0.8705 macro-F1 and 0.9143 accuracy, the best on every reported metric. It needs a GPU: 1.723 s per 1,000 sentences on a T4 and about 33 minutes to reach the epoch-2 checkpoint.</p>`:
+ `<span class="m">Cost first</span><h3>Logistic regression + position</h3><p class="b">Keeps 95.3% of the best macro-F1 (0.8295 against 0.8705), trains 171 times faster (11.7 s against 1,999.6 s) and runs inference 23.6 times faster, on a CPU. It is the better fit for batch indexing on CPU-only machines.</p>`}
+$('#hw').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;[...$('#hw').children].forEach(x=>x.setAttribute('aria-pressed',x===b));drawRec(b.dataset.h==='g');if(!reduce)$('#rec').animate([{opacity:0,transform:'translateY(6px)'},{opacity:1,transform:'none'}],{duration:350,easing:'cubic-bezier(.2,.7,.2,1)'})});drawRec(true);
+/* scroll loop */
+let q=0;
+function tick(){q=0;
+ const h=document.documentElement,f=clamp(scrollY/Math.max(1,h.scrollHeight-innerHeight)),d=Math.min(9,Math.floor(f*10));
+ $('#pg').style.transform=`scaleX(${f})`;
+ 
+ setActive(activeId());walk()}
+const req=()=>{if(!q)q=requestAnimationFrame(tick)};
+addEventListener('scroll',req,{passive:true});
+addEventListener('resize',()=>{setHH();setActive(curId||activeId(),true);req()});
+setHH();setActive(activeId(),true);tick();
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>{setHH();setActive(curId,true);tick()});
+</script>
+
+</body></html>
